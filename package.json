@@ -6,7 +6,9 @@
   "author": "jonny",
   "type": "commonjs",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "codegen": "playwright codegen https://source.thenbs.com"
+  },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.1"
