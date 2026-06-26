@@ -7,7 +7,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "codegen": "playwright codegen https://source.thenbs.com"
+    "codegen": "playwright codegen https://source.thenbs.com",
+    "test:ui": "playwright test --ui",
+    "test:headless": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
