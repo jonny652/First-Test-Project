@@ -46,7 +46,7 @@ test("assert the I'm a manufacturer button is visible, has correct text and corr
   await page.getByRole('textbox', { name: 'Search' }).press('Enter');
   await page.getByRole('tab', { name: 'Manufacturers' }).click();
   await page.getByRole('link', { name: 'Dyson Dyson Technology for' }).click();
-  const manufacturerButton = page.locator('a[href="https://manufacturers.thenbs.com/nbs-source"]');
+  const manufacturerButton = page.locator('a[action="manufacturer-header-link"]');
   await expect(manufacturerButton).toBeVisible();
   await expect(manufacturerButton).toContainText("I'm a manufacturer");
   await expect(manufacturerButton).toHaveAttribute('href', 'https://manufacturers.thenbs.com/nbs-source');
