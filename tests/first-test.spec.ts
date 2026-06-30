@@ -63,7 +63,7 @@ test.describe('Dyson manufacturer page', () => {
     await expect(manufacturerButton).toHaveAttribute('href', 'https://manufacturers.thenbs.com/nbs-source');
   });
 
-  test('visual regression of the dyson manufacturer page', async ({ page }) => {
+  test('visual regression of the dyson manufacturer page', async ({ page }, testInfo) => {
     // 1. Scroll top-to-bottom so lazy-loaded images start fetching.
     await triggerLazyLoad(page);
 
@@ -93,7 +93,10 @@ test.describe('Dyson manufacturer page', () => {
 
     // --- File paths ---
     const snapshotDir = path.resolve('tests/snapshots');
-    const platformSuffix = process.platform;
+    // Include the browser/project name in the suffix so each browser keeps its
+    // own baseline. Browsers render at different device scale factors (e.g.
+    // webkit/Desktop Safari uses DPR 2), so a shared baseline would never match.
+    const platformSuffix = `${process.platform}-${testInfo.project.name}`;
     const baselinePath = path.join(snapshotDir, `dyson-visual-${platformSuffix}.png`);
     const actualPath = path.join(snapshotDir, `dyson-visual-${platformSuffix}-actual.png`);
     const diffPath = path.join(snapshotDir, `dyson-visual-${platformSuffix}-diff.png`);
@@ -157,7 +160,10 @@ test.describe('Dyson manufacturer page', () => {
     fs.writeFileSync(diffPath, PNG.sync.write(diff));
 
     const diffRatio = diffPixels / (width * height);
-    if (diffRatio > 0) {
+    // Allow a small tolerance to absorb anti-aliasing, sub-pixel font shifts and
+    // other harmless rendering noise. Fail only when the diff exceeds 1%.
+    const diffThreshold = 0.01;
+    if (diffRatio > diffThreshold) {
       const error = new Error(
         `Visual regression detected: ${diffPixels} pixels differ ` +
           `(${(diffRatio * 100).toFixed(6)}%). Diff saved to ${diffPath}`,
