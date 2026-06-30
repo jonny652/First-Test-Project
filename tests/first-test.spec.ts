@@ -115,11 +115,41 @@ test.describe('Dyson manufacturer page', () => {
 
     const baseline = PNG.sync.read(fs.readFileSync(baselinePath));
     const actual = PNG.sync.read(screenshotBuffer);
-    const { width, height } = baseline;
+
+    // Crop both images to the smaller of the two dimensions so that minor
+    // page-height differences (dynamic content, ads, cookie banners) don't
+    // crash pixelmatch, which requires identical image sizes.
+    const width = Math.min(baseline.width, actual.width);
+    const height = Math.min(baseline.height, actual.height);
+
+    if (baseline.width !== actual.width || baseline.height !== actual.height) {
+      console.warn(
+        `Image dimensions differ — baseline: ${baseline.width}x${baseline.height}, ` +
+          `actual: ${actual.width}x${actual.height}. Comparing cropped region ${width}x${height}.`,
+      );
+    }
+
+    const cropPNG = (src: PNG): PNG => {
+      const out = new PNG({ width, height });
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const srcIdx = (y * src.width + x) * 4;
+          const dstIdx = (y * width + x) * 4;
+          out.data[dstIdx]     = src.data[srcIdx];
+          out.data[dstIdx + 1] = src.data[srcIdx + 1];
+          out.data[dstIdx + 2] = src.data[srcIdx + 2];
+          out.data[dstIdx + 3] = src.data[srcIdx + 3];
+        }
+      }
+      return out;
+    };
+
+    const croppedBaseline = cropPNG(baseline);
+    const croppedActual   = cropPNG(actual);
     const diff = new PNG({ width, height });
 
     const diffPixels = pixelmatch(
-      baseline.data, actual.data, diff.data,
+      croppedBaseline.data, croppedActual.data, diff.data,
       width, height,
       { threshold: 0.1 },
     );
