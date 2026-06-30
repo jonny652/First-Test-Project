@@ -86,7 +86,7 @@ test.describe('Dyson manufacturer page', () => {
       );
       console.warn(
         `waitForImagesLoaded timed out — ${pending.length} image(s) still loading. ` +
-          `Continuing with screenshot. Pending:\n  ${pending.join('\n  ')}`,
+        `Continuing with screenshot. Pending:\n  ${pending.join('\n  ')}`,
       );
     }
 
@@ -126,7 +126,7 @@ test.describe('Dyson manufacturer page', () => {
     if (baseline.width !== actual.width || baseline.height !== actual.height) {
       console.warn(
         `Image dimensions differ — baseline: ${baseline.width}x${baseline.height}, ` +
-          `actual: ${actual.width}x${actual.height}. Comparing cropped region ${width}x${height}.`,
+        `actual: ${actual.width}x${actual.height}. Comparing cropped region ${width}x${height}.`,
       );
     }
 
@@ -136,7 +136,7 @@ test.describe('Dyson manufacturer page', () => {
         for (let x = 0; x < width; x++) {
           const srcIdx = (y * src.width + x) * 4;
           const dstIdx = (y * width + x) * 4;
-          out.data[dstIdx]     = src.data[srcIdx];
+          out.data[dstIdx] = src.data[srcIdx];
           out.data[dstIdx + 1] = src.data[srcIdx + 1];
           out.data[dstIdx + 2] = src.data[srcIdx + 2];
           out.data[dstIdx + 3] = src.data[srcIdx + 3];
@@ -146,7 +146,7 @@ test.describe('Dyson manufacturer page', () => {
     };
 
     const croppedBaseline = cropPNG(baseline);
-    const croppedActual   = cropPNG(actual);
+    const croppedActual = cropPNG(actual);
     const diff = new PNG({ width, height });
 
     const diffPixels = pixelmatch(
@@ -164,7 +164,7 @@ test.describe('Dyson manufacturer page', () => {
     if (diffRatio > diffThreshold) {
       const error = new Error(
         `Visual regression detected: ${diffPixels} pixels differ ` +
-          `(${(diffRatio * 100).toFixed(6)}%). Diff saved to ${diffPath}`,
+        `(${(diffRatio * 100).toFixed(6)}%). Diff saved to ${diffPath}`,
       ) as Error & { diffPath?: string };
       error.diffPath = diffPath;
       throw error;
