@@ -1,14 +1,21 @@
 import { test, expect } from '@playwright/test';
 
+
+
 test.describe('Dyson manufacturer page', () => {
   test.beforeEach(async ({ page }) => {
+    const closePopup = page.getByRole('button', { name: 'Close dialog' });
+    const searchField = page.getByRole('textbox', { name: 'Search' });
+    const manufacturerTab = page.getByRole('tab', { name: 'Manufacturers' });
+    const dysonManufacturerTile = page.getByRole('link', { name: 'Dyson Dyson Technology for' });
+
     await page.goto('https://source.thenbs.com/en/gb');
-    await page.getByRole('button', { name: 'Close dialog' }).click();
-    await page.getByRole('textbox', { name: 'Search' }).click();
-    await page.getByRole('textbox', { name: 'Search' }).fill('dyson');
-    await page.getByRole('textbox', { name: 'Search' }).press('Enter');
-    await page.getByRole('tab', { name: 'Manufacturers' }).click();
-    await page.getByRole('link', { name: 'Dyson Dyson Technology for' }).click();
+    await closePopup.click();
+    await searchField.click();
+    await searchField.fill('dyson');
+    await searchField.press('Enter');
+    await manufacturerTab.click();
+    await dysonManufacturerTile.click();
     await expect(page).toHaveURL("https://source.thenbs.com/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview");
   });
 
