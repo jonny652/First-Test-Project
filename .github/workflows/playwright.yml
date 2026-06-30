@@ -5,63 +5,42 @@ on:
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
-permissions:
-  contents: write
+    inputs:
+      all_browsers:
+        description: 'Run tests against all browsers? (off = Microsoft Edge only)'
+        type: boolean
+        default: false
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
       with:
-        node-version: lts/*
+        node-version: '24.15.0'
     - name: Install dependencies
       run: npm ci
-    - name: Install Playwright Browsers
+
+    # When the toggle is ON, install every browser. Otherwise just Edge.
+    - name: Install all Playwright Browsers
+      if: ${{ inputs.all_browsers == true }}
       run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test tests/first-test.spec.ts
-    - name: Commit new Linux visual baseline if created
-      if: ${{ github.event_name == 'push' }}
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        if [ ! -d tests/snapshots ]; then
-          echo "No snapshots directory found."
-          exit 0
-        fi
-        git add tests/snapshots/
-        if git diff --cached --quiet; then
-          echo "No new baselines to commit."
-        else
-          git commit -m "chore: add Linux visual regression baseline"
-          git push
-        fi
+    - name: Install Microsoft Edge only
+      if: ${{ inputs.all_browsers != true }}
+      run: npx playwright install msedge --with-deps
 
-    - name: Upload Linux visual snapshots
-      uses: actions/upload-artifact@v4
-      if: ${{ always() }}
-      with:
-        name: visual-snapshots-linux
-        path: tests/snapshots/*linux*.png
-        if-no-files-found: warn
-        retention-days: 30
+    # When the toggle is ON, run all projects. Otherwise just Microsoft Edge.
+    - name: Run Playwright tests (all browsers)
+      if: ${{ inputs.all_browsers == true }}
+      run: npx playwright test
+    - name: Run Playwright tests (Microsoft Edge)
+      if: ${{ inputs.all_browsers != true }}
+      run: npx playwright test --project="Microsoft Edge"
 
-    - name: Upload accessibility report
-      uses: actions/upload-artifact@v4
-      if: ${{ always() }}
-      with:
-        name: accessibility-report
-        path: accessibility-reports/
-        if-no-files-found: warn
-        retention-days: 30
-
-    - name: Upload Playwright HTML report
-      uses: actions/upload-artifact@v4
-      if: ${{ always() }}
+    - uses: actions/upload-artifact@v5
+      if: ${{ !cancelled() }}
       with:
         name: playwright-report
         path: playwright-report/
-        if-no-files-found: warn
-        retention-days: 30
+        retention-days: 7
