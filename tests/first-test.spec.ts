@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { createHtmlReport } from 'axe-html-reporter';
 
 test.describe('Dyson manufacturer page', () => {
   test.beforeEach(async ({ page }) => {
@@ -29,5 +31,16 @@ test.describe('Dyson manufacturer page', () => {
     await expect(manufacturerButton).toBeVisible();
     await expect(manufacturerButton).toContainText("I'm a manufacturer");
     await expect(manufacturerButton).toHaveAttribute('href', 'https://manufacturers.thenbs.com/nbs-source');
+  });
+
+  test('accessibility audit of the dyson manufacturer page', async ({ page }) => {
+    const results = await new AxeBuilder({ page }).analyze();
+    createHtmlReport({
+      results,
+      options: {
+        outputDir: 'accessibility-reports',
+        reportFileName: 'dyson-accessibility-report.html',
+      },
+    });
   });
 });
