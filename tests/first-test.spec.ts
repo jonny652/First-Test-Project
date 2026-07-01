@@ -70,9 +70,9 @@ test.describe('Dyson manufacturer page', () => {
     await expect(manufacturerButton).toContainText("I'm a manufacturer");
     await expect(manufacturerButton).toHaveAttribute('href', 'https://manufacturers.thenbs.com/nbs-source');
   });
-
+  
+  // 4. Compare the page against a saved screenshot (visual regression).
   test('visual regression of the dyson manufacturer page', async ({ page }, testInfo) => {
-    // 4. Compare the page against a saved screenshot (visual regression).
     // Get the page fully loaded and settled before screenshotting.
     await triggerLazyLoad(page);
     await page.waitForLoadState('networkidle', { timeout: 30000 });
