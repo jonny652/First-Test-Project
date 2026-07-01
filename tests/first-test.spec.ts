@@ -6,10 +6,6 @@ import path from "path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 
-// The URL we expect to land on after opening the Dyson manufacturer page.
-const dysonManufacturerUrl =
-  "https://source.thenbs.com/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview";
-
 // Helper function to scroll down the page to trigger lazy loading of images.
 // Scroll down the whole page so lazy-loaded images start downloading.
 async function triggerLazyLoad(page: Page) {
@@ -45,6 +41,9 @@ test.describe("Dyson manufacturer page", () => {
     const searchField = page.getByRole("textbox", { name: "Search" });
     const manufacturerTab = page.getByRole("tab", { name: "Manufacturers" });
     const dysonManufacturerTile = page.getByRole("link", { name: "Dyson Dyson Technology for" });
+    // The URL we expect to land on after opening the Dyson manufacturer page.
+    const dysonManufacturerUrl =
+    "https://source.thenbs.com/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview";
 
     // ACTIONS — the navigation steps, also inline.
     await page.goto("https://source.thenbs.com/en/gb");
