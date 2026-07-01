@@ -6,6 +6,7 @@ import path from 'path';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 
+// Helper function to scroll down the page to trigger lazy loading of images.
 // Scroll down the whole page so lazy-loaded images start downloading.
 async function triggerLazyLoad(page: Page) {
   await page.evaluate(async () => {
@@ -26,6 +27,7 @@ async function triggerLazyLoad(page: Page) {
   });
 }
 
+// Helper function to wait until all images on the page have finished loading.
 // Wait until every image on the page has finished loading.
 async function waitForImagesLoaded(page: Page) {
   await page.waitForFunction(
