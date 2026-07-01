@@ -2,7 +2,22 @@
 
 Work top to bottom. **Each step ends with tests green → commit → stop & review.** Never move on red.
 
-> **Golden rule:** Fixture *builds* the tools · POM *holds* the tools · Test *uses* the tools.
+> **Golden rule:** POM *holds* the tools ·· Fixture *builds* the tools ·· Test *uses* the tools.
+
+**What that actually means** (think of a workshop 🔧):
+
+- **POM = the toolbox.** Each `pages/*.ts` file *holds* the tools for one page — the **locators**
+  (where things are on the page) and the **actions** (what you can do, like `search()` or
+  `goto()`). The toolbox owns the tools, but it doesn't decide when they get used.
+- **Fixture = the assistant who hands you the toolbox.** `fixtures/test-options.ts` *builds* the
+  page objects for you so the test never has to write `new NbsHomePage(page)` itself. You just ask
+  for `nbsHomePage` and it's ready to go.
+- **Test = the job you're doing.** `first-test.spec.ts` *uses* the tools — it calls the actions
+  (`nbsHomePage.search('dyson')`) and checks the results (`expect(...)`). It reads almost like plain
+  English because all the messy detail lives in the toolbox.
+
+Why split it three ways? So each piece has **one job**. If the website changes a button, you fix it
+**once** in the toolbox (POM) and every test keeps working. The test itself barely changes.
 
 ---
 
