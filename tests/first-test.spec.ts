@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "../fixtures/test-options";
+import { type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { createHtmlReport } from "axe-html-reporter";
 import fs from "fs";
@@ -35,41 +36,31 @@ async function waitForImagesLoaded(page: Page) {
 
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
-  test.beforeEach(async ({ page }) => {
-    const searchField = page.getByRole("textbox", { name: "Search" });
-    const closeDialogButton = page.getByRole("button", { name: "Close dialog" });
-    const manufacturesTab = page.getByRole("tab", { name: "Manufacturers" });
-    const dysonLink = page.getByRole("link", { name: "Dyson Dyson Technology for" });
-
-    await page.goto("https://source.thenbs.com/en/gb");
-    await closeDialogButton.click();
-    await searchField.click();
-    await searchField.fill("dyson");
-    await searchField.press("Enter");
-    await manufacturesTab.click();
-    await dysonLink.click();
-    await expect(page).toHaveURL("https://source.thenbs.com/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview");
+  test.beforeEach(async ({ nbsHomePage, dysonManufacturerPage, page }) => {
+    await nbsHomePage.goto();
+    await nbsHomePage.closePopup();
+    await nbsHomePage.search("dyson");
+    await nbsHomePage.openManufacturersTab();
+    await nbsHomePage.openDysonManufacturer();
+    await expect(page).toHaveURL(dysonManufacturerPage.expectedUrl);
   });
 
   // 1. Check the main heading is visible and mentions Dyson.
-  test("assert that the heading is correct on the dyson homepage", async ({ page }) => {
-    const heading = page.getByRole("heading", { level: 1 });
-    await expect(heading).toBeVisible();
-    await expect(heading).toContainText("Dyson");
+  test("assert that the heading is correct on the dyson homepage", async ({ dysonManufacturerPage }) => {
+    await expect(dysonManufacturerPage.heading).toBeVisible();
+    await expect(dysonManufacturerPage.heading).toContainText("Dyson");
   });
 
   // 2. Check the Source logo links back to the homepage.
-  test("Ensure the HREF attribute on the source logo is as expected", async ({ page }) => {
-    const logo = page.locator("a.brand-primary.wrapper");
-    await expect(logo).toHaveAttribute("href", "/en/gb");
+  test("Ensure the HREF attribute on the source logo is as expected", async ({ dysonManufacturerPage }) => {
+    await expect(dysonManufacturerPage.sourceLogo).toHaveAttribute("href", "/en/gb");
   });
 
   // 3. Check the "I'm a manufacturer" button is visible with the right text and link.
-  test("assert the I'm a manufacturer button is visible, has correct text and correct href", async ({ page }) => {
-    const manufacturerButton = page.locator('a[action="manufacturer-header-link"]');
-    await expect(manufacturerButton).toBeVisible();
-    await expect(manufacturerButton).toContainText("I'm a manufacturer");
-    await expect(manufacturerButton).toHaveAttribute("href", "https://manufacturers.thenbs.com/nbs-source");
+  test("assert the I'm a manufacturer button is visible, has correct text and correct href", async ({ dysonManufacturerPage }) => {
+    await expect(dysonManufacturerPage.manufacturerButton).toBeVisible();
+    await expect(dysonManufacturerPage.manufacturerButton).toContainText("I'm a manufacturer");
+    await expect(dysonManufacturerPage.manufacturerButton).toHaveAttribute("href", "https://manufacturers.thenbs.com/nbs-source");
   });
 
   // 4. Compare the page against a saved screenshot (visual regression).
