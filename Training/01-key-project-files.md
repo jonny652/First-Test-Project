@@ -61,8 +61,10 @@ how your tests run. In this project it controls things like:
   failed. Here it's 60 seconds.
 - **`fullyParallel: true`** — allows tests to run at the same time instead of one after another,
   which makes them finish faster.
-- **`workers: 1`** — how many tests run in parallel at once. A "worker" is like a separate lane on a
-  motorway. More workers = more tests running side-by-side.
+- **`workers`** — how many tests run in parallel at once. A "worker" is like a separate lane on a
+  motorway; more workers = more tests running side-by-side. We set
+  `workers: process.env.CI ? 1 : undefined`, which means *run one at a time on the CI server*
+  (stable) but *use the fast parallel default on your own machine*.
 - **`retries`** — how many times to automatically re-run a test if it fails (useful on the CI server
   to smooth over occasional flaky failures).
 - **`reporter: 'html'`** — after a test run, Playwright builds a nice HTML report you can open in a
@@ -89,16 +91,70 @@ safety checks that catch mistakes *before* you even run the tests.
 ### `tests/` — where your actual tests live 🧪
 
 This folder holds your test files. Each one ends in `.spec.ts` (the `.spec` part signals "this is a
-test specification"). For example, `tests/example.spec.ts` opens a web page and checks the page
-title is correct.
+test specification"). For example, `tests/first-test.spec.ts` searches NBS Source for Dyson, opens
+its manufacturer page, and then checks the heading, links, appearance, and accessibility.
 
 A single test typically follows a simple pattern:
 1. **Go** to a web page.
 2. **Do** something (click a link, type into a box).
 3. **Check** that the result is what you expected.
 
+Notice the tests are short and readable — they say *what* to check, not *how* to find every button.
+That "how" lives in the `pages/`, `fixtures/`, and `utils/` folders described next. This is the
+**Page Object Model (POM)** in action.
+
 > **Why it matters:** This is the part you'll spend most of your time in. Everything else in this
 > list exists to *support* the files in this folder.
+
+---
+
+### `pages/` — the Page Object Model classes 🗺️
+
+This folder holds one **class per page** of the website. Each class keeps all the **locators**
+(*where* things are on that page) and **actions** (*what* you can do there) in one place, so your
+tests don't have to. If the website changes a button, you fix it *once* here instead of in every
+test.
+
+- **`pages/NbsHomePage.ts`** — the home page: searching and navigating to a manufacturer.
+- **`pages/DysonManufacturerPage.ts`** — the Dyson page: the heading, logo, and buttons we check.
+- **`pages/BasePage.ts`** — the **parent class** the others `extend`. It holds behaviour that works
+  on *any* page (like `closePopup()`), so every page inherits it for free instead of copy-pasting it.
+
+> **Why it matters:** One page = one file. This is the single biggest habit for keeping a growing
+> test suite maintainable. See training docs `02` and `05` for the full story.
+
+---
+
+### `fixtures/` — the "toolbox assistant" 🧰
+
+This folder holds our custom **fixtures** (`fixtures/test-options.ts`). A fixture is something
+Playwright prepares *before* a test and hands straight to it. We use it to build our page objects
+automatically, so tests can just ask for `nbsHomePage` or `dysonManufacturerPage` by name and never
+have to write `new NbsHomePage(page)` themselves.
+
+Tests import `test` and `expect` from **this file** instead of from `@playwright/test`, and get all
+our page objects wired up for free.
+
+> **Why it matters:** It removes repetitive setup boilerplate from every test and guarantees each
+> test gets a fresh, ready-to-use page object. See training doc `02` for a deep dive.
+
+---
+
+### `utils/` — reusable test machinery 🔧
+
+This folder holds **helper functions that aren't tied to any one page** — cross-cutting "test
+machinery" that any test can call:
+
+- **`utils/visual-regression.ts`** — takes a screenshot and compares it against a saved baseline to
+  catch unexpected visual changes.
+- **`utils/accessibility.ts`** — scans the page for accessibility problems and writes an HTML report.
+
+These live here (rather than inside a page object) because pixel-diffing and accessibility scanning
+aren't things a *user does on a page* — they're QA techniques that work on *any* page.
+
+> **Why it matters:** It keeps page objects focused purely on locators and actions. The rule of
+> thumb: *shared things a **page** does → `pages/BasePage.ts`; shared **test machinery** →
+> `utils/`.* Training doc `05` explains this distinction in full.
 
 ---
 
@@ -156,6 +212,10 @@ This is a large, auto-generated folder containing all the dependencies from `pac
 | `playwright.config.ts`            | The control panel for how Playwright runs your tests.       |
 | `tsconfig.json`                   | The rulebook for the TypeScript language.                   |
 | `tests/`                          | Where your actual test files live.                          |
+| `pages/`                          | Page Object Model classes: locators + actions, one per page.|
+| `pages/BasePage.ts`               | Parent class with behaviour shared by every page.           |
+| `fixtures/`                       | Builds page objects and hands them to tests automatically.  |
+| `utils/`                          | Reusable test machinery (visual regression, accessibility). |
 | `.gitignore`                      | Tells Git which files to ignore.                            |
 | `.github/workflows/playwright.yml`| Automatically runs your tests on GitHub (CI).               |
 | `README.md`                       | The welcome page explaining what the project is.            |
