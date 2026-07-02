@@ -19,13 +19,31 @@ export class NbsHomePage {
   }
 
   // ACTIONS
-  async navigateToDysonManufacturerPage(): Promise<void> {
+
+  /** Open the NBS Source homepage. */
+  async goto(): Promise<void> {
     await this.page.goto("https://source.thenbs.com/en/gb");
+  }
+
+  /** Close the cookie/marketing popup. */
+  async closePopup(): Promise<void> {
     await this.closeDialogButton.click();
+  }
+
+  /** Type a search term and submit it. */
+  async search(term: string): Promise<void> {
     await this.searchField.click();
-    await this.searchField.fill("dyson");
+    await this.searchField.fill(term);
     await this.searchField.press("Enter");
+  }
+
+  /** Switch to the Manufacturers results tab. */
+  async openManufacturersTab(): Promise<void> {
     await this.manufacturerTab.click();
+  }
+
+  /** Click the Dyson result tile to open its manufacturer page. */
+  async openDysonManufacturer(): Promise<void> {
     await this.dysonManufacturerTile.click();
   }
 }
