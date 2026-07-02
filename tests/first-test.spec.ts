@@ -1,6 +1,4 @@
 import { test, expect } from "../fixtures/test-options";
-import AxeBuilder from "@axe-core/playwright";
-import { createHtmlReport } from "axe-html-reporter";
 import fs from "fs";
 import path from "path";
 import pixelmatch from "pixelmatch";
@@ -37,14 +35,7 @@ test.describe("Dyson manufacturer page", () => {
   });
 
   // 5. Run an accessibility scan and save the results as an HTML report.
-  test("accessibility audit of the dyson manufacturer page", async ({ page }) => {
-    const results = await new AxeBuilder({ page }).analyze();
-    createHtmlReport({
-      results,
-      options: {
-        outputDir: "accessibility-reports",
-        reportFileName: "dyson-accessibility-report.html",
-      },
-    });
+  test("accessibility audit of the dyson manufacturer page", async ({ dysonManufacturerPage }) => {
+    await dysonManufacturerPage.verifyNoAccessibilityIssues();
   });
 });

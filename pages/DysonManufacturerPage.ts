@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
+import AxeBuilder from "@axe-core/playwright";
+import { createHtmlReport } from "axe-html-reporter";
 
 // The Dyson manufacturer page — heading, logo, and the "I'm a manufacturer" button.
 export class DysonManufacturerPage {
@@ -149,5 +151,17 @@ export class DysonManufacturerPage {
       error.diffPath = diffPath;
       throw error;
     }
+  }
+
+  async verifyNoAccessibilityIssues(): Promise<void> {
+    const results = await new AxeBuilder({ page: this.page }).analyze();
+    createHtmlReport({
+      results,
+      options: {
+        outputDir: "accessibility-reports",
+        reportFileName: "dyson-accessibility-report.html",
+      },
+    });
+    
   }
 }
