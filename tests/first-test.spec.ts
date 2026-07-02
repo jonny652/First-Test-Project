@@ -1,38 +1,10 @@
 import { test, expect } from "../fixtures/test-options";
-import { type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { createHtmlReport } from "axe-html-reporter";
 import fs from "fs";
 import path from "path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
-
-// Helper function to scroll down the page to trigger lazy loading of images.
-// Scroll down the whole page so lazy-loaded images start downloading.
-async function triggerLazyLoad(page: Page) {
-  await page.evaluate(async () => {
-    await new Promise<void>((resolve) => {
-      let totalHeight = 0;
-      const distance = 300;
-      const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
-        window.scrollBy(0, distance);
-        totalHeight += distance;
-        if (totalHeight >= scrollHeight) {
-          clearInterval(timer);
-          window.scrollTo(0, 0);
-          resolve();
-        }
-      }, 100);
-    });
-  });
-}
-
-// Helper function to wait until all images on the page have finished loading.
-// Wait until every image on the page has finished loading.
-async function waitForImagesLoaded(page: Page) {
-  await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), { timeout: 10000 });
-}
 
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
@@ -60,14 +32,14 @@ test.describe("Dyson manufacturer page", () => {
   });
 
   // 4. Compare the page against a saved screenshot (visual regression).
-  test("visual regression of the dyson manufacturer page", async ({ page }, testInfo) => {
+  test("visual regression of the dyson manufacturer page", async ({ page, dysonManufacturerPage }, testInfo) => {
     // Get the page fully loaded and settled before screenshotting.
-    await triggerLazyLoad(page);
+    await dysonManufacturerPage.triggerLazyLoad();
     await page.waitForLoadState("networkidle", { timeout: 30000 });
 
     // Check every image loaded (warn but carry on if not).
     try {
-      await waitForImagesLoaded(page);
+      await dysonManufacturerPage.waitForImagesLoaded();
     } catch {
       const pending = await page.evaluate(() =>
         Array.from(document.images)

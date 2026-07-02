@@ -19,5 +19,32 @@ export class DysonManufacturerPage {
 
    // ACTIONS
 
+  /** Scrolls the full page top-to-bottom so lazy-loaded images start fetching. */
+  async triggerLazyLoad(): Promise<void> {
+    await this.page.evaluate(async () => {
+      await new Promise<void>((resolve) => {
+        let totalHeight = 0;
+        const distance = 300;
+        const timer = setInterval(() => {
+          const scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            window.scrollTo(0, 0);
+            resolve();
+          }
+        }, 100);
+      });
+    });
+  }
+
+  /** Waits until every <img> on the page reports as fully loaded. */
+  async waitForImagesLoaded(): Promise<void> {
+    await this.page.waitForFunction(
+      () => Array.from(document.images).every((img) => img.complete),
+      { timeout: 10000 },
+    );
+  }
 
 }
