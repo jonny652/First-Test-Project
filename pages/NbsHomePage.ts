@@ -1,18 +1,16 @@
 import { type Page, type Locator } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
-// The NBS Source home page — search, popups, and navigation into a manufacturer.
-export class NbsHomePage {
-  readonly page: Page;
-
+// The NBS Source home page — search and navigation into a manufacturer.
+// Inherits `page` and `closePopup()` from BasePage.
+export class NbsHomePage extends BasePage {
   // LOCATORS
-  readonly closeDialogButton: Locator;
   readonly searchField: Locator;
   readonly manufacturerTab: Locator;
   readonly dysonManufacturerTile: Locator;
 
   constructor(page: Page) {
-    this.page = page;
-    this.closeDialogButton = page.getByRole("button", { name: "Close dialog" });
+    super(page);
     this.searchField = page.getByRole("textbox", { name: "Search" });
     this.manufacturerTab = page.getByRole("tab", { name: "Manufacturers" });
     this.dysonManufacturerTile = page.getByRole("link", { name: "Dyson Dyson Technology for" });
@@ -23,11 +21,6 @@ export class NbsHomePage {
   /** Open the NBS Source homepage. */
   async goto(): Promise<void> {
     await this.page.goto("https://source.thenbs.com/en/gb");
-  }
-
-  /** Close the cookie/marketing popup. */
-  async closePopup(): Promise<void> {
-    await this.closeDialogButton.click();
   }
 
   /** Type a search term and submit it. */
