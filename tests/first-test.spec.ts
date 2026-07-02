@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "../fixtures/test-options";
+import { type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { createHtmlReport } from "axe-html-reporter";
 import fs from "fs";
