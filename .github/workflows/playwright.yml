@@ -9,7 +9,7 @@ on:
       all_browsers:
         description: 'Run tests against all browsers? (off = Microsoft Edge only)'
         type: boolean
-        default: false
+        default: true
 jobs:
   test:
     timeout-minutes: 60
