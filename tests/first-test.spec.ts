@@ -1,4 +1,7 @@
 import { test, expect } from "../fixtures/test-options";
+import { generateAccessibilityReport } from "../utils/accessability";
+import { applyVisualRegression } from "../utils/visual-regression";
+ 
 
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
@@ -26,12 +29,12 @@ test.describe("Dyson manufacturer page", () => {
   });
 
   // 4. Compare the page against a saved screenshot (visual regression).
-  test("visual regression of the dyson manufacturer page", async ({ dysonManufacturerPage }, testInfo) => {
-    await dysonManufacturerPage.applyVisualRegression(testInfo);
+  test("visual regression of the dyson manufacturer page", async ({ page }, testInfo) => {
+    await applyVisualRegression(page, testInfo, "dyson-manufacturer-page");
   });
 
   // 5. Run an accessibility scan and save the results as an HTML report.
-  test("accessibility audit of the dyson manufacturer page", async ({ dysonManufacturerPage }) => {
-    await dysonManufacturerPage.verifyNoAccessibilityIssues();
+  test("accessibility audit of the dyson manufacturer page", async ({ page }) => {
+    await generateAccessibilityReport(page);
   });
 });
