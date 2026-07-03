@@ -47,10 +47,7 @@ export class DysonManufacturerPage {
 
   /** Waits until every <img> on the page reports as fully loaded. */
   async waitForImagesLoaded(): Promise<void> {
-    await this.page.waitForFunction(
-      () => Array.from(document.images).every((img) => img.complete),
-      { timeout: 10000 },
-    );
+    await this.page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), { timeout: 10000 });
   }
 
   /** Screenshots the page and compares it against a saved baseline (visual regression). */
@@ -162,6 +159,5 @@ export class DysonManufacturerPage {
         reportFileName: "dyson-accessibility-report.html",
       },
     });
-    
   }
 }

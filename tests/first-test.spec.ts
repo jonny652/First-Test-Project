@@ -1,8 +1,4 @@
 import { test, expect } from "../fixtures/test-options";
-import fs from "fs";
-import path from "path";
-import pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
 
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
@@ -30,7 +26,7 @@ test.describe("Dyson manufacturer page", () => {
   });
 
   // 4. Compare the page against a saved screenshot (visual regression).
-  test("visual regression of the dyson manufacturer page", async ({ page, dysonManufacturerPage }, testInfo) => {
+  test("visual regression of the dyson manufacturer page", async ({ dysonManufacturerPage }, testInfo) => {
     await dysonManufacturerPage.applyVisualRegression(testInfo);
   });
 
