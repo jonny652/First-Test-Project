@@ -78,4 +78,11 @@ test.describe("Dyson manufacturer page", () => {
     expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
   });
 
+  // 8. Ensure that the sign in process is working as expected.
+  test("Ensure that the sign in process works correctly", async ({ basePage, page }) => {
+    await basePage.verifySignInProcess();
+  });
+
+
+
 });
