@@ -1,4 +1,5 @@
 import { test, expect } from "../fixtures/test-options";
+import { BasePage } from "../pages/BasePage";
 import { generateAccessibilityReport } from "../utils/accessability";
 import { applyVisualRegression } from "../utils/visual-regression";
  
@@ -6,7 +7,11 @@ import { applyVisualRegression } from "../utils/visual-regression";
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
   test.beforeEach(async ({ nbsHomePage, dysonManufacturerPage, page }) => {
-    await nbsHomePage.navigateToDysonManufacturerPage();
+    await nbsHomePage.goto();
+    await nbsHomePage.closePopup();
+    await nbsHomePage.search("dyson");
+    await nbsHomePage.openManufacturersTab();
+    await nbsHomePage.openDysonManufacturer();
     await expect(page).toHaveURL(dysonManufacturerPage.url);
   });
 
