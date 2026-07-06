@@ -9,6 +9,8 @@ export class BasePage {
   readonly closeDialogButton: Locator;
   readonly signInButton: Locator;
   readonly emailField: Locator;
+  readonly passwordField: Locator;
+  readonly next: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -16,6 +18,8 @@ export class BasePage {
     this.backToTopButton = page.locator('[data-cy="backToTopButton"]');
     this.signInButton = page.getByRole("button", { name: "Sign in" });
     this.emailField = page.getByRole("textbox", { name: "Email address" });
+    this.passwordField = page.getByRole("textbox", { name: "Password" });
+    this.next = page.getByRole("button", { name: "Next" });
   }
 
   // ACTIONS
@@ -41,8 +45,12 @@ export class BasePage {
     // Implementation for sign in verification goes here.
     await this.signInButton.click();
     await this.emailField.fill("jonny_uk@live.co.uk");
-    await this.page.getByRole("button", { name: "Next" }).click();
+    await this.next.click();
+    await this.passwordField.click();
+    await this.passwordField.fill('Spitfire2026!');
     await this.signInButton.click();
-    await this.page.getByRole("button", { name: "Open user menu" }).waitFor({ state: "visible" });
+    
+
+     
   }
 }
