@@ -11,6 +11,8 @@ export class BasePage {
   readonly emailField: Locator;
   readonly passwordField: Locator;
   readonly next: Locator;
+  readonly imAManufacturerButton: Locator;
+  readonly manufactureUrl = "https://manufacturers.thenbs.com/products/nbs-source";
 
   constructor(page: Page) {
     this.page = page;
@@ -20,6 +22,7 @@ export class BasePage {
     this.emailField = page.getByRole("textbox", { name: "Email address" });
     this.passwordField = page.getByRole("textbox", { name: "Password" });
     this.next = page.getByRole("button", { name: "Next" });
+    this.imAManufacturerButton = page.getByRole("button", { name: "I'm a manufacturer" });
   }
 
   // ACTIONS
@@ -49,8 +52,11 @@ export class BasePage {
     await this.passwordField.click();
     await this.passwordField.fill('Spitfire2026!');
     await this.signInButton.click();
-    
+  }
 
-     
+  //** Verify the "I'm a manufacturer" button works correctly. */
+  async verifyImAManufacturerButton(): Promise<void> {
+     await this.imAManufacturerButton.click();
+     await this.page.waitForURL(this.manufactureUrl);
   }
 }
