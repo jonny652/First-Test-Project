@@ -12,7 +12,7 @@ export class BasePage {
   readonly passwordField: Locator;
   readonly next: Locator;
   readonly imAManufacturerButton: Locator;
-  readonly manufactureUrl = "https://manufacturers.thenbs.com/products/nbs-source";
+  readonly manufactureUrl = "https://manufacturers.thenbs.com/nbs-source";
 
   constructor(page: Page) {
     this.page = page;
@@ -22,7 +22,7 @@ export class BasePage {
     this.emailField = page.getByRole("textbox", { name: "Email address" });
     this.passwordField = page.getByRole("textbox", { name: "Password" });
     this.next = page.getByRole("button", { name: "Next" });
-    this.imAManufacturerButton = page.getByRole("button", { name: "I'm a manufacturer" });
+    this.imAManufacturerButton = page.locator('a[action="manufacturer-header-link"]');
   }
 
   // ACTIONS
@@ -54,9 +54,12 @@ export class BasePage {
     await this.signInButton.click();
   }
 
-  //** Verify the "I'm a manufacturer" button works correctly. */
+  //** Verify the "I'm a manufacturer" button links to the correct URL. */
   async verifyImAManufacturerButton(): Promise<void> {
-     await this.imAManufacturerButton.click();
-     await this.page.waitForURL(this.manufactureUrl);
+    await this.imAManufacturerButton.waitFor({ state: "visible" });
+    const href = await this.imAManufacturerButton.getAttribute("href");
+    if (href !== this.manufactureUrl) {
+      throw new Error(`Expected href "${this.manufactureUrl}" but got "${href}"`);
+    }
   }
 }
