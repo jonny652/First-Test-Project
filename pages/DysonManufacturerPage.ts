@@ -24,6 +24,7 @@ export class DysonManufacturerPage extends BasePage {
   readonly allTabs: Locator;
   readonly dysonTelephoneNumber: Locator;
   readonly dysonWebsiteLink: Locator;
+  readonly linkedInIcon: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -39,6 +40,7 @@ export class DysonManufacturerPage extends BasePage {
     this.allTabs = page.locator('.mat-mdc-tab-links a[role="tab"]');
     this.dysonTelephoneNumber = page.locator('a[href="tel:08003457788"]');
     this.dysonWebsiteLink = page.locator('a[href="https://www.dyson.co.uk/commercial/overview"]');
+    this.linkedInIcon = page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
   }
 
   // ACTIONS

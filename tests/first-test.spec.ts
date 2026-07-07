@@ -90,6 +90,7 @@ test.describe("Dyson manufacturer page", () => {
   
   // 10. Assert that the dyson telephone number is correct.
   test("Ensure the HREF attribute on the Dyson telephone number is as expected", async ({ dysonManufacturerPage }) => {
+    await expect(dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
     await expect(dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", "tel:08003457788");
   });
 
@@ -101,10 +102,9 @@ test.describe("Dyson manufacturer page", () => {
     await expect(dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
   });
 
-  // 12. Assert the Linked in icon is visible, has the expected href
+  // 12. Assert the LinkedIn icon is visible and has the expected href.
   test("Ensure the HREF attribute on the LinkedIn icon is as expected", async ({ dysonManufacturerPage }) => {
-    const linkedInIcon = dysonManufacturerPage.page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
-    await expect(linkedInIcon).toBeVisible();
-    await expect(linkedInIcon).toHaveAttribute("href", "https://www.linkedin.com/company/dyson/");
+    await expect(dysonManufacturerPage.linkedInIcon).toBeVisible();
+    await expect(dysonManufacturerPage.linkedInIcon).toHaveAttribute("href", "https://www.linkedin.com/company/dyson/");
   });
 });
