@@ -22,6 +22,8 @@ export class DysonManufacturerPage extends BasePage {
   readonly caseStudiesTab: Locator;
   readonly aboutTab: Locator;
   readonly allTabs: Locator;
+  readonly dysonTelephoneNumber: Locator;
+  readonly dysonWebsiteLink: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -35,6 +37,8 @@ export class DysonManufacturerPage extends BasePage {
     this.caseStudiesTab = page.locator('[data-cy="caseStudiesTab"]');
     this.aboutTab = page.locator('[data-cy="aboutTab"]');
     this.allTabs = page.locator('.mat-mdc-tab-links a[role="tab"]');
+    this.dysonTelephoneNumber = page.locator('a[href="tel:08003457788"]');
+    this.dysonWebsiteLink = page.locator('a[href="https://www.dyson.co.uk/commercial/overview"]');
   }
 
   // ACTIONS

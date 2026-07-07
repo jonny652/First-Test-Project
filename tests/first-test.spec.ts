@@ -82,9 +82,29 @@ test.describe("Dyson manufacturer page", () => {
   test("Ensure that the sign in process works correctly", async ({ basePage, page }) => {
     await basePage.verifySignInProcess();
   });
+  
   // 9. Ensure that the "I'm a manufacturer" button contains the correct URL.
   test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage, page }) => {
     await basePage.verifyImAManufacturerButton();
   });
+  
+  // 10. Assert that the dyson telephone number is correct.
+  test("Ensure the HREF attribute on the Dyson telephone number is as expected", async ({ dysonManufacturerPage }) => {
+    await expect(dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", "tel:08003457788");
+  });
 
+  // 11. Assert that the dyson Website link is visible and the href is correct
+  test("Ensure the HREF attribute on the Dyson website link is as expected", async ({ dysonManufacturerPage }) => {
+    await expect(dysonManufacturerPage.dysonWebsiteLink).toBeVisible();
+    await expect(dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("href", "https://www.dyson.co.uk/commercial/overview");
+    // target="_blank" means the browser will open the link in a new tab — checked without clicking.
+    await expect(dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
+  });
+
+  // 12. Assert the Linked in icon is visible, has the expected href
+  test("Ensure the HREF attribute on the LinkedIn icon is as expected", async ({ dysonManufacturerPage }) => {
+    const linkedInIcon = dysonManufacturerPage.page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
+    await expect(linkedInIcon).toBeVisible();
+    await expect(linkedInIcon).toHaveAttribute("href", "https://www.linkedin.com/company/dyson/");
+  });
 });
