@@ -82,8 +82,8 @@ test.describe("Dyson manufacturer page", () => {
   test("Ensure that the sign in process works correctly", async ({ basePage, page }) => {
     await basePage.verifySignInProcess();
   });
-  // 9. Ensure that the "I'm a manufacturer" button works correctly.
-  test("Ensure that the 'I'm a manufacturer' button works correctly", async ({ basePage, page }) => {
+  // 9. Ensure that the "I'm a manufacturer" button contains the correct URL.
+  test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage, page }) => {
     await basePage.verifyImAManufacturerButton();
   });
 
