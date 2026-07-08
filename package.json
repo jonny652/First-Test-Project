@@ -8,8 +8,9 @@
   "main": "index.js",
   "scripts": {
     "codegen": "playwright codegen https://source.thenbs.com",
-    "test:ui": "playwright test --ui",
-    "test:headless": "playwright test"
+    "test:ui": "playwright test --ui --project=\"Microsoft Edge\"",
+    "test:headless": "playwright test --project=\"Microsoft Edge\"",
+    "test:all": "playwright test"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "^2.1.202",
