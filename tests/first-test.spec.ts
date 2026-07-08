@@ -91,7 +91,7 @@ test.describe("Dyson manufacturer page", () => {
   // 10. Assert that the dyson telephone number is correct.
   test("Ensure the HREF attribute on the Dyson telephone number is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
-    await expect(dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", "tel:08003457788");
+    await expect(dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", "tel:08003457788"); //this is already proven by the locator in the DysonManufacturerPage.ts file, but this test ensures that the href is correct and visible on the page.
   });
 
   // 11. Assert that the dyson Website link is visible and the href is correct
