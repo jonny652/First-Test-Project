@@ -78,4 +78,9 @@ test.describe("Dyson manufacturer page", () => {
     expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
   });
 
+  // 8. Ensure that the "I'm a manufacturer" button contains the correct URL.
+  test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage }) => {
+    await basePage.verifyImAManufacturerButton();
+  });
+
 });
