@@ -4,12 +4,6 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
-    inputs:
-      all_browsers:
-        description: 'Run tests against all browsers? (off = Microsoft Edge only)'
-        type: boolean
-        default: true
 jobs:
   test:
     timeout-minutes: 60
@@ -22,21 +16,11 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    # When the toggle is ON, install every browser. Otherwise just Edge.
-    - name: Install all Playwright Browsers
-      if: ${{ inputs.all_browsers == true }}
-      run: npx playwright install --with-deps
-    - name: Install Microsoft Edge only
-      if: ${{ inputs.all_browsers != true }}
-      run: npx playwright install msedge --with-deps
+    - name: Install Chromium only
+      run: npx playwright install chromium --with-deps
 
-    # When the toggle is ON, run all projects. Otherwise just Microsoft Edge.
-    - name: Run Playwright tests (all browsers)
-      if: ${{ inputs.all_browsers == true }}
-      run: npx playwright test
-    - name: Run Playwright tests (Microsoft Edge)
-      if: ${{ inputs.all_browsers != true }}
-      run: npx playwright test --project="Microsoft Edge"
+    - name: Run Playwright tests (Chromium)
+      run: npx playwright test --project=chromium
 
     - uses: actions/upload-artifact@v5
       if: ${{ !cancelled() }}
