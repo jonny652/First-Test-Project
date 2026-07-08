@@ -25,6 +25,8 @@ export class DysonManufacturerPage extends BasePage {
   readonly dysonTelephoneNumber: Locator;
   readonly dysonWebsiteLink: Locator;
   readonly linkedInIcon: Locator;
+  readonly heartAddItemToCollectionIcon: Locator;
+  
 
   constructor(page: Page) {
     super(page);
@@ -41,6 +43,8 @@ export class DysonManufacturerPage extends BasePage {
     this.dysonTelephoneNumber = page.locator('a[href="tel:08003457788"]');
     this.dysonWebsiteLink = page.locator('a[href="https://www.dyson.co.uk/commercial/overview"]');
     this.linkedInIcon = page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
+    //this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"]');
+    this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"].foreground-heart').first();
   }
 
   // ACTIONS

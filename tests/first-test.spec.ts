@@ -107,4 +107,28 @@ test.describe("Dyson manufacturer page", () => {
     await expect(dysonManufacturerPage.linkedInIcon).toBeVisible();
     await expect(dysonManufacturerPage.linkedInIcon).toHaveAttribute("href", "https://www.linkedin.com/company/dyson/");
   });
+
+
+  // 13. Assert the Heart icon will allow loged in users to add an item to their collection.
+  test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page, basePage }) => {
+    // 0. Sign in — adding to a collection requires an authenticated user.
+    await basePage.verifySignInProcess();
+
+    // 1. Verify the heart icon has the correct title attribute
+    await expect(dysonManufacturerPage.heartAddItemToCollectionIcon).toHaveAttribute("title", "Select item");
+
+    //Click the heart icon
+    await dysonManufacturerPage.heartAddItemToCollectionIcon.click();
+
+    //Verify the icon changed to the active/selected state
+    await expect(dysonManufacturerPage.heartAddItemToCollectionIcon).toHaveClass(/active/);
+
+    //Verify the title changed to "Deselect item"
+    await expect(dysonManufacturerPage.heartAddItemToCollectionIcon).toHaveAttribute("title", "Deselect item");
+
+    //Verify the purple bar is displayed showing 1 item has been selected
+    const selectionBar = page.getByText(/Selected item \(\d+\)/);
+    await expect(selectionBar).toBeVisible();
+    await expect(selectionBar).toHaveText("Selected item (1)");
+  });
 });
