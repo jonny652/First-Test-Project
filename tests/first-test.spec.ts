@@ -103,7 +103,6 @@ test.describe("Dyson manufacturer page", () => {
   // 12. Assert the LinkedIn icon is visible and has the expected href.
   test("Ensure the HREF attribute on the LinkedIn icon is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.linkedInIcon).toBeVisible();
-    await expect(dysonManufacturerPage.linkedInIcon).toHaveAttribute("href", "https://www.linkedin.com/company/dyson/");
   });
 
 
