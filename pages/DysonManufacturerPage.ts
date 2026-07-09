@@ -12,7 +12,7 @@ export class DysonManufacturerPage extends BasePage {
   readonly url = "https://source.thenbs.com/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview";
 
   // LOCATORS
-  readonly heading: Locator;
+  
   readonly sourceLogo: Locator;
   readonly manufacturerButton: Locator;
   readonly overviewTab: Locator;
@@ -30,7 +30,6 @@ export class DysonManufacturerPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.heading = page.getByRole("heading", { level: 1 });// this can moved to the base page if all manufacturer pages have a heading with level 1
     this.sourceLogo = page.locator("a.brand-primary.wrapper");
     this.manufacturerButton = page.locator('a[action="manufacturer-header-link"]');
     this.overviewTab = page.locator('[data-cy="overviewTab"]');
@@ -45,6 +44,7 @@ export class DysonManufacturerPage extends BasePage {
     this.linkedInIcon = page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
     //this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"]');
     this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"].foreground-heart').first();
+    
   }
 
   // ACTIONS

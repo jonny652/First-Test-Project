@@ -14,6 +14,7 @@ export class BasePage {
   readonly imAManufacturerButton: Locator;
   readonly userMenuButton: Locator;
   readonly manufactureUrl = "https://manufacturers.thenbs.com/nbs-source";
+  readonly heading: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -25,6 +26,7 @@ export class BasePage {
     this.next = page.getByRole("button", { name: "Next" });
     this.imAManufacturerButton = page.locator('a[action="manufacturer-header-link"]');
     this.userMenuButton = page.getByRole("button", { name: "Open user menu" });
+    this.heading = page.getByRole("heading", { level: 1 });// this can moved to the base page if all manufacturer pages have a heading with level 1
   }
 
   // ACTIONS
