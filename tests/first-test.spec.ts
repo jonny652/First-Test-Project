@@ -18,17 +18,17 @@ test.describe("Dyson manufacturer page", () => {
   // 1. Check the main heading is visible and mentions Dyson.
   test("assert that the heading is correct on the dyson homepage", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.heading).toBeVisible();
-    await expect(dysonManufacturerPage.heading).toContainText("Dyson");
+    await expect(dysonManufacturerPage.heading).toContainText("Dyson");// this can moved to the base page if all manufacturer pages have a heading with level 1
   });
 
   // 2. Check the Source logo links back to the homepage.
   test("Ensure the HREF attribute on the source logo is as expected", async ({ dysonManufacturerPage }) => {
-    await expect(dysonManufacturerPage.sourceLogo).toHaveAttribute("href", "/en/gb");
+    await expect(dysonManufacturerPage.sourceLogo).toHaveAttribute("href", "/en/gb");// Base page because all pages have a source logo that links back to the homepage  
   });
 
   // 3. Check the "I'm a manufacturer" button is visible with the right text and link.
   test("assert the I'm a manufacturer button is visible, has correct text and correct href", async ({ dysonManufacturerPage }) => {
-    await expect(dysonManufacturerPage.manufacturerButton).toBeVisible();
+    await expect(dysonManufacturerPage.manufacturerButton).toBeVisible();// base page because all pages have a I'm a manufacturer button that links to the manufacturers.thenbs.com/nbs-source
     await expect(dysonManufacturerPage.manufacturerButton).toContainText("I'm a manufacturer");
     await expect(dysonManufacturerPage.manufacturerButton).toHaveAttribute("href", "https://manufacturers.thenbs.com/nbs-source");
   });
@@ -91,7 +91,7 @@ test.describe("Dyson manufacturer page", () => {
   // 10. Assert that the dyson telephone number is correct.
   test("Ensure the HREF attribute on the Dyson telephone number is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
-    await expect(dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", "tel:08003457788");
+    await expect(dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", "tel:08003457788"); //this is already proven by the locator in the DysonManufacturerPage.ts file, but this test ensures that the href is correct and visible on the page.
   });
 
   // 11. Assert that the dyson Website link is visible and the href is correct

@@ -30,7 +30,7 @@ export class DysonManufacturerPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.heading = page.getByRole("heading", { level: 1 });
+    this.heading = page.getByRole("heading", { level: 1 });// this can moved to the base page if all manufacturer pages have a heading with level 1
     this.sourceLogo = page.locator("a.brand-primary.wrapper");
     this.manufacturerButton = page.locator('a[action="manufacturer-header-link"]');
     this.overviewTab = page.locator('[data-cy="overviewTab"]');

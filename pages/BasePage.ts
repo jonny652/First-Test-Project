@@ -12,6 +12,7 @@ export class BasePage {
   readonly passwordField: Locator;
   readonly next: Locator;
   readonly imAManufacturerButton: Locator;
+  readonly userMenuButton: Locator;
   readonly manufactureUrl = "https://manufacturers.thenbs.com/nbs-source";
 
   constructor(page: Page) {
@@ -23,13 +24,21 @@ export class BasePage {
     this.passwordField = page.getByRole("textbox", { name: "Password" });
     this.next = page.getByRole("button", { name: "Next" });
     this.imAManufacturerButton = page.locator('a[action="manufacturer-header-link"]');
+    this.userMenuButton = page.getByRole("button", { name: "Open user menu" });
   }
 
   // ACTIONS
 
-  /** Close the cookie/marketing popup. It can appear across the site, not just one page. */
+  /** Close the cookie/marketing popup. It can appear across the site, not just one page.
+   *  Skipped when absent — e.g. a reused signed-in storage state already carries the
+   *  cookie-consent dismissal, so the popup never shows up again. */
   async closePopup(): Promise<void> {
-    await this.closeDialogButton.click();
+    try {
+      await this.closeDialogButton.waitFor({ state: "visible", timeout: 5000 });
+      await this.closeDialogButton.click();
+    } catch {
+      // Popup didn't appear — nothing to close.
+    }
   }
 
   //** Scroll to the very bottom of the page. */
@@ -52,6 +61,9 @@ export class BasePage {
     await this.passwordField.click();
     await this.passwordField.fill('Spitfire2026!');
     await this.signInButton.click();
+    // Wait for the header's user menu to appear before returning, so callers
+    // know sign in has actually completed rather than just having clicked through it.
+    await this.userMenuButton.waitFor({ state: "visible" });
   }
 
   //** Verify the "I'm a manufacturer" button links to the correct URL. */
