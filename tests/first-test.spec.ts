@@ -16,9 +16,9 @@ test.describe("Dyson manufacturer page", () => {
   });
 
   // 1. Check the main heading is visible and mentions Dyson.
-  test("assert that the heading is correct on the dyson homepage", async ({ dysonManufacturerPage }) => {
+  test("assert that the heading is correct on the dyson manufacturer page", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.heading).toBeVisible();
-    await expect(dysonManufacturerPage.heading).toContainText("Dyson");// this can moved to the base page if all manufacturer pages have a heading with level 1
+    await expect(dysonManufacturerPage.heading).toContainText("Dyson");
   });
 
   // 2. Check the Source logo links back to the homepage.
@@ -28,7 +28,7 @@ test.describe("Dyson manufacturer page", () => {
 
   // 3. Check the "I'm a manufacturer" button is visible with the right text and link.
   test("assert the I'm a manufacturer button is visible, has correct text and correct href", async ({ dysonManufacturerPage }) => {
-    await expect(dysonManufacturerPage.manufacturerButton).toBeVisible();// base page because all pages have a I'm a manufacturer button that links to the manufacturers.thenbs.com/nbs-source
+    await expect(dysonManufacturerPage.manufacturerButton).toBeVisible();
     await expect(dysonManufacturerPage.manufacturerButton).toContainText("I'm a manufacturer");
     await expect(dysonManufacturerPage.manufacturerButton).toHaveAttribute("href", "https://manufacturers.thenbs.com/nbs-source");
   });
