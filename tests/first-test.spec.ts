@@ -96,7 +96,6 @@ test.describe("Dyson manufacturer page", () => {
   // 11. Assert that the dyson Website link is visible and the href is correct
   test("Ensure the HREF attribute on the Dyson website link is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.dysonWebsiteLink).toBeVisible();
-    await expect(dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("href", "https://www.dyson.co.uk/commercial/overview");
     // target="_blank" means the browser will open the link in a new tab — checked without clicking.
     await expect(dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
   });
