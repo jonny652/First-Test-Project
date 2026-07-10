@@ -27,6 +27,7 @@ export class DysonManufacturerPage extends BasePage {
   readonly linkedInIcon: Locator;
   readonly heartAddItemToCollectionIcon: Locator;
   
+  
 
   constructor(page: Page) {
     super(page);
@@ -44,7 +45,6 @@ export class DysonManufacturerPage extends BasePage {
     this.linkedInIcon = page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
     //this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"]');
     this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"].foreground-heart').first();
-    
   }
 
   // ACTIONS

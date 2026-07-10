@@ -1,3 +1,4 @@
+import { basename } from "node:path";
 import { test, expect } from "../fixtures/test-options";
 import { BasePage } from "../pages/BasePage";
 import { generateAccessibilityReport } from "../utils/accessability";
@@ -77,36 +78,31 @@ test.describe("Dyson manufacturer page", () => {
     const tabLabels = await dysonManufacturerPage.allTabs.allTextContents();
     expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
   });
-
-  // 8. Ensure that the sign in process is working as expected.
-  test("Ensure that the sign in process works correctly", async ({ basePage, page }) => {
-    await basePage.verifySignInProcess();
-  });
   
-  // 9. Ensure that the "I'm a manufacturer" button contains the correct URL.
+  // 8. Ensure that the "I'm a manufacturer" button contains the correct URL.
   test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage, page }) => {
     await basePage.verifyImAManufacturerButton();
   });
   
-  // 10. Assert that the dyson telephone number is correct.
+  // 9. Assert that the dyson telephone number is correct.
   test("Ensure the HREF attribute on the Dyson telephone number is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
   });
 
-  // 11. Assert that the dyson Website link is visible and the href is correct
+  // 10. Assert that the dyson Website link is visible and the href is correct
   test("Ensure the HREF attribute on the Dyson website link is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.dysonWebsiteLink).toBeVisible();
     // target="_blank" means the browser will open the link in a new tab — checked without clicking.
     await expect(dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
   });
 
-  // 12. Assert the LinkedIn icon is visible and has the expected href.
+  // 11. Assert the LinkedIn icon is visible and has the expected href.
   test("Ensure the HREF attribute on the LinkedIn icon is as expected", async ({ dysonManufacturerPage }) => {
     await expect(dysonManufacturerPage.linkedInIcon).toBeVisible();
   });
 
 
-  // 13. Assert the Heart icon will allow loged in users to add an item to their collection.
+  // 12. Assert the Heart icon will allow loged in users to add an item to their collection.
   test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page, basePage }) => {
     // 0. Sign in — adding to a collection requires an authenticated user.
     await basePage.verifySignInProcess();
@@ -127,5 +123,18 @@ test.describe("Dyson manufacturer page", () => {
     const selectionBar = page.getByText(/Selected item \(\d+\)/);
     await expect(selectionBar).toBeVisible();
     await expect(selectionBar).toHaveText("Selected item (1)");
+  });
+
+    // 13. Verify that the "contact manufacturer" button when clicked creates a pop up window.
+  test("Ensure that the 'contact manufacturer' button creates a pop up window when clicked", async ({ dysonManufacturerPage, page }) => {
+    await dysonManufacturerPage.contactManufacturerButton.click();
+    // Verify that the Dyson logo, labels, fields and buttons are present in the pop up window
+    const contactManufacturerPopup = page.getByRole("dialog");
+    await expect(contactManufacturerPopup).toBeVisible();
+    await expect(contactManufacturerPopup.getByRole("heading", { name: "Contact manufacturer" })).toBeVisible();
+    await expect(contactManufacturerPopup.getByPlaceholder("Write your name here...")).toBeVisible();
+    await expect(contactManufacturerPopup.getByPlaceholder("Write your email address here...")).toBeVisible();
+    await expect(contactManufacturerPopup.getByPlaceholder("Write your message here...")).toBeVisible();
+    await expect(contactManufacturerPopup.getByRole("button", { name: "Send" })).toBeVisible();
   });
 });
