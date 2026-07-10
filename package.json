@@ -10,16 +10,22 @@
     "codegen": "playwright codegen https://source.thenbs.com",
     "test:ui": "playwright test --ui --project=\"Microsoft Edge\"",
     "test:headless": "playwright test --project=\"Microsoft Edge\"",
-    "test:all": "playwright test"
+    "test:all": "playwright test",
+    "test:bdd": "cucumber-js",
+    "test:bdd:report": "cucumber-js && node features/support/generate-report.js"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "^2.1.202",
     "@axe-core/playwright": "^4.12.1",
+    "@cucumber/cucumber": "^13.0.0",
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.1",
     "@types/pngjs": "^6.0.5",
     "axe-html-reporter": "^2.2.11",
+    "multiple-cucumber-html-reporter": "^4.1.0",
     "pixelmatch": "^7.2.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

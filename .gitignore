@@ -10,3 +10,7 @@ accessibility-reports/dyson-accessibility-report.html
 # Visual-regression run artifacts (only the baseline *.png should be committed)
 tests/snapshots/*-actual.png
 tests/snapshots/*-diff.png
+
+# Cucumber
+/reports/
+/cucumber-report/
