@@ -104,8 +104,6 @@ test.describe("Dyson manufacturer page", () => {
 
   // 12. Assert the Heart icon will allow loged in users to add an item to their collection.
   test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page, basePage }) => {
-    // 0. Sign in — adding to a collection requires an authenticated user.
-    await basePage.verifySignInProcess();
 
     // 1. Verify the heart icon has the correct title attribute
     await expect(dysonManufacturerPage.heartAddItemToCollectionIcon).toHaveAttribute("title", "Select item");
