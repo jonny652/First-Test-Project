@@ -1,4 +1,4 @@
-import { type Page, type TestInfo } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import pixelmatch from "pixelmatch";
@@ -42,10 +42,18 @@ async function waitForImagesLoaded(page: Page): Promise<void> {
   );
 }
  
-/** Screenshots the page and compares it against a saved baseline (visual regression). */
+/**
+ * Screenshots the page and compares it against a saved baseline (visual regression).
+ *
+ * `projectName` only needs to uniquely identify the browser/runner this screenshot
+ * came from (e.g. a Playwright TestInfo's `project.name`, or a plain label for a
+ * non-Playwright-runner caller like a Cucumber step) — it's used purely to keep each
+ * runner's baseline separate, since the same page can render slightly differently
+ * per browser engine.
+ */
 export async function applyVisualRegression(
   page: Page,
-  testInfo: TestInfo,
+  projectName: string,
   snapshotName: string,
 ): Promise<void> {
   // Get the page fully loaded and settled before screenshotting.
@@ -73,7 +81,7 @@ export async function applyVisualRegression(
  
   // Each browser gets its own baseline (they render at different sizes).
   const snapshotDir = path.resolve("tests/snapshots");
-  const platformSuffix = `${process.platform}-${testInfo.project.name}`;
+  const platformSuffix = `${process.platform}-${projectName}`;
   const baselinePath = path.join(snapshotDir, `${snapshotName}-${platformSuffix}.png`);
   const actualPath = path.join(snapshotDir, `${snapshotName}-${platformSuffix}-actual.png`);
   const diffPath = path.join(snapshotDir, `${snapshotName}-${platformSuffix}-diff.png`);

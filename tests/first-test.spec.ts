@@ -3,7 +3,6 @@ import { test, expect } from "../fixtures/test-options";
 import { BasePage } from "../pages/BasePage";
 import { generateAccessibilityReport } from "../utils/accessability";
 import { applyVisualRegression } from "../utils/visual-regression";
- 
 
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
@@ -36,7 +35,7 @@ test.describe("Dyson manufacturer page", () => {
 
   // 4. Compare the page against a saved screenshot (visual regression).
   test("visual regression of the dyson manufacturer page", async ({ page }, testInfo) => {
-    await applyVisualRegression(page, testInfo, "dyson-manufacturer-page");
+    await applyVisualRegression(page, testInfo.project.name, "dyson-manufacturer-page");
   });
 
   // 5. Run an accessibility scan and save the results as an HTML report.
