@@ -34,3 +34,15 @@ Feature: Dyson manufacturer page
    
   Scenario:  Assert tabs are all visible, in the correct order, and each href is correct.
     Then the tabs should be visible, in the correct order, and each href should be correct
+
+  Scenario: Ensure that the "I'm a manufacturer" button contains the correct URL.
+    Then the "I'm a manufacturer" button should have the correct href "https://manufacturers.thenbs.com/nbs-source"
+
+  Scenario: Assert that the dyson telephone number is correct.
+    Then Ensure the HREF attribute on the Dyson telephone number is as expected "tel:08003457788"
+
+  Scenario: Assert that the dyson Website link is visible and the href is correct
+    Then Ensure the HREF attribute on the Dyson Website link is as expected "https://www.dyson.co.uk"
+
+  Scenario: Assert the LinkedIn icon is visible and has the expected href
+    Then Ensure the HREF attribute on the LinkedIn icon is as expected "https://www.linkedin.com/company/dyson/"
