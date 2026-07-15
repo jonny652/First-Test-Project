@@ -32,3 +32,5 @@ Feature: Dyson manufacturer page
   Scenario: I should see the "Back to top" button appear after scrolling down, successfully scrolls the page back to the top when clicked, and then hides itself again
     When I click the "Back to top" button it behaves as expected
    
+  Scenario:  Assert tabs are all visible, in the correct order, and each href is correct.
+    Then the tabs should be visible, in the correct order, and each href should be correct

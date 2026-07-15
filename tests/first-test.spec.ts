@@ -55,27 +55,7 @@ test.describe("Dyson manufacturer page", () => {
 
   // 7. Assert tabs are all visible, in the correct order, and each href is correct.
   test("navigation tabs are visible, in the correct order, and have correct hrefs", async ({ dysonManufacturerPage }) => {
-    // Each entry pairs a tab locator (targeting the element via data-cy) with its expected href.
-    // This drives two assertions per tab: is it visible, and does it point to the right URL?
-    const expectedTabs = [
-      { locator: dysonManufacturerPage.overviewTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview" },
-      { locator: dysonManufacturerPage.productsTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/products" },
-      { locator: dysonManufacturerPage.certificatesTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/third-party-certifications" },
-      { locator: dysonManufacturerPage.literatureTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/literature" },
-      { locator: dysonManufacturerPage.caseStudiesTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/case-studies" },
-      { locator: dysonManufacturerPage.aboutTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/about" },
-    ];
-
-    // Loop through each tab and assert it is visible on the page and carries the correct href attribute.
-    for (const tab of expectedTabs) {
-      await expect(tab.locator).toBeVisible();
-      await expect(tab.locator).toHaveAttribute("href", tab.href);
-    }
-
-    // Read the text of every tab in DOM order, trim whitespace, and assert the full sequence matches.
-    // This catches any tab being added, removed, or reordered without changing individual locators.
-    const tabLabels = await dysonManufacturerPage.allTabs.allTextContents();
-    expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
+    await dysonManufacturerPage.assertTabsVisibilityOrderAndHref();
   });
   
   // 8. Ensure that the "I'm a manufacturer" button contains the correct URL.

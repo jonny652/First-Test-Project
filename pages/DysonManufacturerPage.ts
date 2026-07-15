@@ -1,4 +1,4 @@
-import { type Page, type Locator, type TestInfo } from "@playwright/test";
+import { type Page, type Locator, type TestInfo, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import pixelmatch from "pixelmatch";
@@ -49,7 +49,27 @@ export class DysonManufacturerPage extends BasePage {
 
   // ACTIONS
 
-  
+  /** Assert all navigation tabs are visible, in the correct order, and each has the correct href. */
+  async assertTabsVisibilityOrderAndHref(): Promise<void> {
+    // Each entry pairs a tab locator with its expected href.
+    const expectedTabs = [
+      { locator: this.overviewTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview" },
+      { locator: this.productsTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/products" },
+      { locator: this.certificatesTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/third-party-certifications" },
+      { locator: this.literatureTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/literature" },
+      { locator: this.caseStudiesTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/case-studies" },
+      { locator: this.aboutTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/about" },
+    ];
 
+    // Assert each tab is visible and carries the correct href.
+    for (const tab of expectedTabs) {
+      await expect(tab.locator).toBeVisible();
+      await expect(tab.locator).toHaveAttribute("href", tab.href);
+    }
 
+    // Read every tab's text in DOM order and assert the full sequence matches —
+    // catches a tab being added, removed, or reordered without changing individual locators.
+    const tabLabels = await this.allTabs.allTextContents();
+    expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
+  }
 }

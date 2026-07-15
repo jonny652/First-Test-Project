@@ -74,3 +74,7 @@ Then("an accessibility report should be generated for the Dyson manufacturer pag
 When('I click the "Back to top" button it behaves as expected', async function (this: CustomWorld) {
   await this.dysonManufacturerPage.clickBackToTopButton();
 });
+
+Then("the tabs should be visible, in the correct order, and each href should be correct", async function (this: CustomWorld) {
+  await this.dysonManufacturerPage.assertTabsVisibilityOrderAndHref();
+});
