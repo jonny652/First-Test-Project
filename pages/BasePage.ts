@@ -1,4 +1,4 @@
-import { type Page, type Locator } from "@playwright/test";
+import { type Page, type Locator, expect } from "@playwright/test";
 
 // Shared behaviour that applies to ANY page on the site (not specific to one page).
 // Page objects extend this to inherit common locators/actions like closing the popup.
@@ -77,5 +77,18 @@ export class BasePage {
     if (href !== this.manufactureUrl) {
       throw new Error(`Expected href "${this.manufactureUrl}" but got "${href}"`);
     }
+  }
+
+    //** Ensure that the 'contact manufacturer' button creates a pop up window when clicked. */
+  async contactManufacturerButtonBehavior(): Promise<void> {
+    await this.contactManufacturerButton.click();
+    // Verify that the Dyson logo, labels, fields and buttons are present in the pop up window
+    const contactManufacturerPopup = this.page.getByRole("dialog");
+    await expect(contactManufacturerPopup).toBeVisible();
+    await expect(contactManufacturerPopup.getByRole("heading", { name: "Contact manufacturer" })).toBeVisible();
+    await expect(contactManufacturerPopup.getByPlaceholder("Write your name here...")).toBeVisible();
+    await expect(contactManufacturerPopup.getByPlaceholder("Write your email address here...")).toBeVisible();
+    await expect(contactManufacturerPopup.getByPlaceholder("Write your message here...")).toBeVisible();
+    await expect(contactManufacturerPopup.getByRole("button", { name: "Send" })).toBeVisible();
   }
 }

@@ -72,4 +72,25 @@ export class DysonManufacturerPage extends BasePage {
     const tabLabels = await this.allTabs.allTextContents();
     expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
   }
+
+
+  //Assert the Heart icon will allow loged in users to add an item to their collection.
+  async assertCollectionButtonBehavesAsExpected(): Promise<void> {
+   // 1. Verify the heart icon has the correct title attribute
+    await expect(this.heartAddItemToCollectionIcon).toHaveAttribute("title", "Select item");
+
+    //Click the heart icon
+    await this.heartAddItemToCollectionIcon.click();
+
+    //Verify the icon changed to the active/selected state
+    await expect(this.heartAddItemToCollectionIcon).toHaveClass(/active/);
+
+    //Verify the title changed to "Deselect item"
+    await expect(this.heartAddItemToCollectionIcon).toHaveAttribute("title", "Deselect item");
+
+    //Verify the purple bar is displayed showing 1 item has been selected
+    const selectionBar = this.page.getByText(/Selected item \(\d+\)/);
+    await expect(selectionBar).toBeVisible();
+    await expect(selectionBar).toHaveText("Selected item (1)");
+  }
 }

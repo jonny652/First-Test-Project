@@ -97,6 +97,6 @@ Then("Ensure the HREF attribute on the LinkedIn icon is as expected {string}", a
   await expect(this.dysonManufacturerPage.linkedInIcon).toHaveAttribute("href", href);
 });
 
-Then("Ensure the HREF attribute on the LinkedIn icon is as expected {string}", async function (this: CustomWorld, href: string) {
-
+When("I click the Heart icon on the Dyson manufacturer page then it behaves as expected", async function (this: CustomWorld) {
+  await this.dysonManufacturerPage.assertCollectionButtonBehavesAsExpected();
 });

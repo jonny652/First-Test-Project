@@ -47,6 +47,7 @@ Feature: Dyson manufacturer page
   Scenario: Assert the LinkedIn icon is visible and has the expected href
     Then Ensure the HREF attribute on the LinkedIn icon is as expected "https://www.linkedin.com/company/dyson/"
 
-  Senario: Ensure that the Heart icon allows logged in users to add an item to their collection
-    When I click the Heart icon on the Dyson manufacturer page
-    Then 
+  Scenario: Ensure that the Heart icon allows logged in users to add an item to their collection
+    When I click the Heart icon on the Dyson manufacturer page then it behaves as expected
+   
+    
