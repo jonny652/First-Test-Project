@@ -79,22 +79,24 @@ Then("the tabs should be visible, in the correct order, and each href should be 
   await this.dysonManufacturerPage.assertTabsVisibilityOrderAndHref();
 });
 
-Then("I'm a manufacturer button should have the correct href {string}", async function (this: CustomWorld, href: string) {
+Then("I'm a manufacturer button should have the correct href {string}", async function (this: CustomWorld) {
   await this.dysonManufacturerPage.verifyImAManufacturerButton();
 });
 
-Then("Ensure the HREF attribute on the Dyson telephone number is as expected {string}", async function (this: CustomWorld, href: string) {
-await this.dysonManufacturerPage.dysonTelephoneNumber.waitFor({ state: "visible" });
+Then("Ensure the HREF attribute on the Dyson telephone number is as expected {string}", async function (this: CustomWorld) {
+await expect(this.dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
 });
 
-Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld, href: string) {
-  await this.dysonManufacturerPage.dysonWebsiteLink.waitFor({ state: "visible" });
+Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld) {
+  await expect(this.dysonManufacturerPage.dysonWebsiteLink).toBeVisible();
   await expect(this.dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
 });
 
 Then("Ensure the HREF attribute on the LinkedIn icon is as expected {string}", async function (this: CustomWorld, href: string) {
-  await this.dysonManufacturerPage.linkedInIcon.waitFor({ state: "visible" });
+  await expect(this.dysonManufacturerPage.linkedInIcon).toBeVisible();
   await expect(this.dysonManufacturerPage.linkedInIcon).toHaveAttribute("href", href);
 });
+
+Then("Ensure the HREF attribute on the LinkedIn icon is as expected {string}", async function (this: CustomWorld, href: string) {
 
 });
