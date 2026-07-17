@@ -1,6 +1,4 @@
-import { basename } from "node:path";
 import { test, expect } from "../fixtures/test-options";
-import { BasePage } from "../pages/BasePage";
 import { generateAccessibilityReport } from "../utils/accessability";
 import { applyVisualRegression } from "../utils/visual-regression";
 
@@ -45,12 +43,12 @@ test.describe("Dyson manufacturer page", () => {
 
   // 6. Back-to-top button — full journey: hidden at top, visible after scroll, returns to top on click.
   test("back-to-top button behaves correctly when scrolling", async ({ basePage, page }) => {
-    await expect(basePage.backToTopButton).not.toBeVisible();
+    await expect(basePage.backToTopButton).toBeHidden();
     await basePage.scrollToBottom();
     await expect(basePage.backToTopButton).toBeVisible();
     await basePage.clickBackToTopButton();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await expect(basePage.backToTopButton).not.toBeVisible();
+    await expect(basePage.backToTopButton).toBeHidden();
   });
 
   // 7. Assert tabs are all visible, in the correct order, and each href is correct.
@@ -59,7 +57,7 @@ test.describe("Dyson manufacturer page", () => {
   });
   
   // 8. Ensure that the "I'm a manufacturer" button contains the correct URL.
-  test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage, page }) => {
+  test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage }) => {
     await basePage.verifyImAManufacturerButton();
   });
   
@@ -82,7 +80,7 @@ test.describe("Dyson manufacturer page", () => {
 
 
   // 12. Assert the Heart icon will allow loged in users to add an item to their collection.
-  test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page, basePage }) => {
+  test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page }) => {
 
     // 1. Verify the heart icon has the correct title attribute
     await expect(dysonManufacturerPage.heartAddItemToCollectionIcon).toHaveAttribute("title", "Select item");

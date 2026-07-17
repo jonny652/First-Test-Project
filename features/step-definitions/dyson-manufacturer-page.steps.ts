@@ -83,8 +83,9 @@ Then("I'm a manufacturer button should have the correct href {string}", async fu
   await this.dysonManufacturerPage.verifyImAManufacturerButton();
 });
 
-Then("Ensure the HREF attribute on the Dyson telephone number is as expected {string}", async function (this: CustomWorld) {
-await expect(this.dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
+Then("Ensure the HREF attribute on the Dyson telephone number is as expected {string}", async function (this: CustomWorld, href: string) {
+  await expect(this.dysonManufacturerPage.dysonTelephoneNumber).toBeVisible();
+  await expect(this.dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", href);
 });
 
 Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld) {

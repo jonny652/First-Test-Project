@@ -11,8 +11,11 @@
     "test:ui": "playwright test --ui --project=\"Microsoft Edge\"",
     "test:headless": "playwright test --project=\"Microsoft Edge\"",
     "test:all": "playwright test",
-    "test:bdd": "cucumber-js",
-    "test:bdd:report": "cucumber-js && node features/support/generate-report.js"
+    "test:bdd": "node features/support/run-bdd.js",
+    "test:bdd:report": "node features/support/run-bdd.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "^2.1.202",
@@ -21,11 +24,21 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.1",
     "@types/pngjs": "^6.0.5",
+    "allure-commandline": "^2.43.0",
+    "allure-cucumberjs": "^3.10.2",
     "axe-html-reporter": "^2.2.11",
-    "multiple-cucumber-html-reporter": "^4.1.0",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.10.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.64.0"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --fix"
   }
 }

@@ -1,10 +1,4 @@
-import { type Page, type Locator, type TestInfo, expect } from "@playwright/test";
-import fs from "fs";
-import path from "path";
-import pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
-import AxeBuilder from "@axe-core/playwright";
-import { createHtmlReport } from "axe-html-reporter";
+import { type Page, type Locator, expect } from "@playwright/test";
 import { BasePage } from "./BasePage";
 
 // The Dyson manufacturer page — heading, logo, and the "I'm a manufacturer" button.
