@@ -20,8 +20,8 @@ export class DysonManufacturerPage extends BasePage {
   readonly dysonWebsiteLink: Locator;
   readonly linkedInIcon: Locator;
   readonly heartAddItemToCollectionIcon: Locator;
-  
-  
+  readonly certificationTileTitles: Locator;
+  readonly noCertificationsMessage: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -39,6 +39,10 @@ export class DysonManufacturerPage extends BasePage {
     this.linkedInIcon = page.locator('a[href="https://www.linkedin.com/company/dyson/"]');
     //this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"]');
     this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"].foreground-heart').first();
+    this.certificationTileTitles = page.locator('[data-cy="searchResultTileTitle"]');
+    // <app-no-results-guidance>'s heading — the site's generic "no results"
+    // component, shared across search/list contexts, not certifications-specific.
+    this.noCertificationsMessage = page.getByRole("heading", { name: "Sorry, no results were found" });
   }
 
   // ACTIONS
@@ -86,5 +90,22 @@ export class DysonManufacturerPage extends BasePage {
     const selectionBar = this.page.getByText(/Selected item \(\d+\)/);
     await expect(selectionBar).toBeVisible();
     await expect(selectionBar).toHaveText("Selected item (1)");
+  }
+
+  /** Click the Certifications tab (client-side routed — no full page navigation). */
+  async openCertificatesTab(): Promise<void> {
+    await this.certificatesTab.click();
+  }
+
+  /** Assert the first certification tile displays the given name. */
+  async assertFirstCertificationNameIs(expectedName: string): Promise<void> {
+    const firstTileTitle = this.certificationTileTitles.first();
+    await expect(firstTileTitle).toBeVisible();
+    await expect(firstTileTitle).toContainText(expectedName);
+  }
+
+  /** Assert the Certifications tab shows its empty-state message when there are no certifications. */
+  async assertNoCertificationsMessageVisible(): Promise<void> {
+    await expect(this.noCertificationsMessage).toBeVisible();
   }
 }

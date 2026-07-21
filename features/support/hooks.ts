@@ -3,6 +3,7 @@ import { chromium, type Browser } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 import { CustomWorld } from "./world";
+import { applyNetworkStubs } from "../../utils/network-stubs";
 
 // Cucumber's default per-step timeout is 5s, too short for real page
 // navigation/network waits. Match playwright.config.ts's 60s test timeout.
@@ -20,9 +21,12 @@ const traceDir = path.join(__dirname, "..", "..", "traces");
 
 // Runs before every scenario: fresh context + page, so scenarios stay isolated
 // from each other (no shared cookies/storage), then wires up the page objects.
-Before(async function (this: CustomWorld) {
+Before(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
   this.browser = browser;
   this.context = await browser.newContext();
+  // Tag-driven network stubs (see utils/network-stubs.ts) — must be
+  // registered before any navigation happens, so this runs before newPage().
+  await applyNetworkStubs(this.context, scenario.pickle.tags.map((tag) => tag.name));
   // screenshots/snapshots/sources give the Trace Viewer a full timeline
   // (DOM snapshots + source code), matching what playwright.config.ts
   // collects for the Playwright-only suite.
