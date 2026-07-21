@@ -117,13 +117,18 @@ function createCertificationsStub(transform: CertificationsTransform) {
 
 export type NetworkStubSetup = (context: BrowserContext) => Promise<void>;
 
-// Add an entry here to bring another network-stub tag online — the Before
-// hook in hooks.ts reads each scenario's tags and calls applyNetworkStubs,
-// so any Given/When/Then referencing a tag below gets the matching stub
-// registered before the page loads. Other stub shapes (a 500, a slow
-// response, a dropped connection, a malformed payload) don't need the
-// fetch-then-transform plumbing above at all — e.g. route.fulfill({status:
-// 500}), a delay before fulfilling, or route.abort().
+// To add a new API test scenario:
+//   1. Tag a scenario in the .feature file, e.g. @stub-error-certifications
+//   2. Add a matching entry to the registry below, keyed by that exact tag
+// hooks.ts automatically picks up any tag it finds a match for here and
+// registers its stub before the page loads — no other wiring needed.
+//
+// Not every stub needs createCertificationsStub (which fetches the real
+// response and edits the certifications array in it). For simpler cases you
+// can write a plain function instead, e.g.:
+//   - a server error: route.fulfill({ status: 500 })
+//   - a slow response: wait, then route.fulfill(...)
+//   - a dropped connection: route.abort()
 export const networkStubRegistry: Record<string, NetworkStubSetup> = {
   "@stub-empty-certifications": createCertificationsStub((match) => {
     match.container[match.key] = [];
