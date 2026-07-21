@@ -1,9 +1,6 @@
-import { basename } from "node:path";
 import { test, expect } from "../fixtures/test-options";
-import { BasePage } from "../pages/BasePage";
 import { generateAccessibilityReport } from "../utils/accessability";
 import { applyVisualRegression } from "../utils/visual-regression";
- 
 
 test.describe("Dyson manufacturer page", () => {
   // Search for Dyson and open its manufacturer page before each test.
@@ -36,51 +33,31 @@ test.describe("Dyson manufacturer page", () => {
 
   // 4. Compare the page against a saved screenshot (visual regression).
   test("visual regression of the dyson manufacturer page", async ({ page }, testInfo) => {
-    await applyVisualRegression(page, testInfo, "dyson-manufacturer-page");
+    await applyVisualRegression(page, testInfo.project.name, "dyson-manufacturer-page");
   });
 
   // 5. Run an accessibility scan and save the results as an HTML report.
   test("accessibility audit of the dyson manufacturer page", async ({ page }) => {
-    await generateAccessibilityReport(page);
+    await generateAccessibilityReport(page, "dyson-accessibility-report.html");
   });
 
   // 6. Back-to-top button — full journey: hidden at top, visible after scroll, returns to top on click.
   test("back-to-top button behaves correctly when scrolling", async ({ basePage, page }) => {
-    await expect(basePage.backToTopButton).not.toBeVisible();
+    await expect(basePage.backToTopButton).toBeHidden();
     await basePage.scrollToBottom();
     await expect(basePage.backToTopButton).toBeVisible();
     await basePage.clickBackToTopButton();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await expect(basePage.backToTopButton).not.toBeVisible();
+    await expect(basePage.backToTopButton).toBeHidden();
   });
 
   // 7. Assert tabs are all visible, in the correct order, and each href is correct.
   test("navigation tabs are visible, in the correct order, and have correct hrefs", async ({ dysonManufacturerPage }) => {
-    // Each entry pairs a tab locator (targeting the element via data-cy) with its expected href.
-    // This drives two assertions per tab: is it visible, and does it point to the right URL?
-    const expectedTabs = [
-      { locator: dysonManufacturerPage.overviewTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview" },
-      { locator: dysonManufacturerPage.productsTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/products" },
-      { locator: dysonManufacturerPage.certificatesTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/third-party-certifications" },
-      { locator: dysonManufacturerPage.literatureTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/literature" },
-      { locator: dysonManufacturerPage.caseStudiesTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/case-studies" },
-      { locator: dysonManufacturerPage.aboutTab, href: "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/about" },
-    ];
-
-    // Loop through each tab and assert it is visible on the page and carries the correct href attribute.
-    for (const tab of expectedTabs) {
-      await expect(tab.locator).toBeVisible();
-      await expect(tab.locator).toHaveAttribute("href", tab.href);
-    }
-
-    // Read the text of every tab in DOM order, trim whitespace, and assert the full sequence matches.
-    // This catches any tab being added, removed, or reordered without changing individual locators.
-    const tabLabels = await dysonManufacturerPage.allTabs.allTextContents();
-    expect(tabLabels.map((t) => t.trim())).toEqual(["Overview", "Products", "Certifications", "Literature", "Case studies", "About us"]);
+    await dysonManufacturerPage.assertTabsVisibilityOrderAndHref();
   });
   
   // 8. Ensure that the "I'm a manufacturer" button contains the correct URL.
-  test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage, page }) => {
+  test("Ensure that the 'I'm a manufacturer' button contains the correct URL", async ({ basePage }) => {
     await basePage.verifyImAManufacturerButton();
   });
   
@@ -103,7 +80,7 @@ test.describe("Dyson manufacturer page", () => {
 
 
   // 12. Assert the Heart icon will allow loged in users to add an item to their collection.
-  test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page, basePage }) => {
+  test("Ensure that the Heart icon allows logged in users to add an item to their collection", async ({ dysonManufacturerPage, page }) => {
 
     // 1. Verify the heart icon has the correct title attribute
     await expect(dysonManufacturerPage.heartAddItemToCollectionIcon).toHaveAttribute("title", "Select item");

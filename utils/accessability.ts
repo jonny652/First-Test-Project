@@ -13,13 +13,13 @@ import { createHtmlReport } from "axe-html-reporter";
  * violations to a report for a human to read. If you ever test a site where issues
  * *should* be fixed, add the assertion back in the calling test.
  */
-export async function generateAccessibilityReport(page: Page): Promise<void> {
+export async function generateAccessibilityReport(page: Page, reportFileName: string): Promise<void> {
   const results = await new AxeBuilder({ page }).analyze();
   createHtmlReport({
     results,
     options: {
       outputDir: "accessibility-reports",
-      reportFileName: "dyson-accessibility-report.html",
+      reportFileName,
     },
   });
 }
