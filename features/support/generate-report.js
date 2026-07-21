@@ -14,9 +14,53 @@ const allureHome = path.join(
 // scripts: spawning a .bat on Windows requires a shell, and shell quoting
 // mangles this project's path (it contains spaces). Calling java.exe
 // directly needs no shell, so Node quotes each argument correctly itself.
-const javaExe = process.env.JAVA_HOME
-  ? path.join(process.env.JAVA_HOME, "bin", "java")
-  : "java";
+function findJava() {
+  const exeName = process.platform === "win32" ? "java.exe" : "java";
+
+  if (process.env.JAVA_HOME) {
+    const fromJavaHome = path.join(process.env.JAVA_HOME, "bin", exeName);
+    if (fs.existsSync(fromJavaHome)) return fromJavaHome;
+  }
+
+  const finder = process.platform === "win32" ? "where" : "which";
+  const probe = spawnSync(finder, ["java"], { encoding: "utf8" });
+  if (probe.status === 0) {
+    const firstMatch = probe.stdout.split(/\r?\n/).find(Boolean);
+    if (firstMatch) return firstMatch.trim();
+  }
+
+  // Windows doesn't refresh an already-running process's PATH/JAVA_HOME
+  // after an installer updates them — a terminal or IDE left open since
+  // before a JRE was installed will never see it, even days later. Fall
+  // back to scanning the usual install locations so report generation
+  // doesn't depend on the calling shell's environment being fresh.
+  if (process.platform === "win32") {
+    const candidateRoots = [
+      process.env["ProgramFiles"] && path.join(process.env["ProgramFiles"], "Eclipse Adoptium"),
+      process.env["ProgramFiles"] && path.join(process.env["ProgramFiles"], "Java"),
+      process.env["ProgramFiles(x86)"] && path.join(process.env["ProgramFiles(x86)"], "Java"),
+    ].filter(Boolean);
+
+    for (const root of candidateRoots) {
+      if (!fs.existsSync(root)) continue;
+      for (const entry of fs.readdirSync(root)) {
+        const candidate = path.join(root, entry, "bin", "java.exe");
+        if (fs.existsSync(candidate)) return candidate;
+      }
+    }
+  }
+
+  return null;
+}
+
+const javaExe = findJava();
+
+if (!javaExe) {
+  console.error(
+    "Allure report generation failed: Java not found. Install a JRE and ensure `java` is on PATH (or set JAVA_HOME), then open a new terminal so it picks up the change."
+  );
+  process.exit(1);
+}
 const classpath = [
   path.join(allureHome, "lib", "*"),
   path.join(allureHome, "config"),
@@ -38,13 +82,7 @@ const result = spawnSync(
 );
 
 if (result.error || result.status !== 0) {
-  if (result.error?.code === "ENOENT") {
-    console.error(
-      "Allure report generation failed: Java not found. Install a JRE and ensure `java` is on PATH (or set JAVA_HOME)."
-    );
-  } else {
-    console.error("Allure report generation failed.");
-  }
+  console.error("Allure report generation failed.");
   process.exitCode = 1;
 } else {
   // Allure resolves its theme from localStorage (falling back to OS
