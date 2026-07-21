@@ -12,3 +12,8 @@ Then("The first certification tile shows {string}", async function (this: Custom
 Then("a suitable message is shown indicating there are no certifications available", async function (this: CustomWorld) {
   await this.dysonManufacturerPage.assertNoCertificationsMessageVisible();
 });
+
+Then("the certifications tab renders no certifications", async function (this: CustomWorld) {
+  await this.dysonManufacturerPage.assertNoCertificationsVisible();
+});
+

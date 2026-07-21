@@ -22,6 +22,7 @@ export class DysonManufacturerPage extends BasePage {
   readonly heartAddItemToCollectionIcon: Locator;
   readonly certificationTileTitles: Locator;
   readonly noCertificationsMessage: Locator;
+  readonly certificationTilesContainer: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -43,6 +44,11 @@ export class DysonManufacturerPage extends BasePage {
     // <app-no-results-guidance>'s heading — the site's generic "no results"
     // component, shared across search/list contexts, not certifications-specific.
     this.noCertificationsMessage = page.getByRole("heading", { name: "Sorry, no results were found" });
+    // <app-certificate-list> — stays mounted (and empty, no tiles, no
+    // no-results messaging) when the certifications request fails, distinct
+    // from the "no results" empty state above (a real search returning zero
+    // results vs. the request failing outright).
+    this.certificationTilesContainer = page.locator('app-certificate-list');
   }
 
   // ACTIONS
@@ -107,5 +113,19 @@ export class DysonManufacturerPage extends BasePage {
   /** Assert the Certifications tab shows its empty-state message when there are no certifications. */
   async assertNoCertificationsMessageVisible(): Promise<void> {
     await expect(this.noCertificationsMessage).toBeVisible();
+  }
+
+  /**
+   * Assert the tile container itself still renders (the tab didn't blow up)
+   * but holds no certification tiles — the request-failed case, distinct
+   * from a genuine empty search result. Checking toBeAttached() rather than
+   * toBeVisible(): the container is an empty flex element with no intrinsic
+   * content, so it collapses to a 0x0 box — genuinely CSS-visible, but
+   * Playwright's toBeVisible() also requires a non-zero bounding box, which
+   * an intentionally-empty container will never have.
+   */
+  async assertNoCertificationsVisible(): Promise<void> {
+    await expect(this.certificationTilesContainer).toBeAttached();
+    await expect(this.certificationTileTitles).toHaveCount(0);
   }
 }

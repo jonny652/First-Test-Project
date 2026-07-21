@@ -50,3 +50,8 @@ Feature: NBS Source API regression
   Scenario: No certifications available shows a suitable message
     When I open the Certifications tab
     Then a suitable message is shown indicating there are no certifications available
+
+  @regression @stub-server500-error 
+  Scenario: A 500 server error shows no tiles
+    When I open the Certifications tab
+    Then the certifications tab renders no certifications

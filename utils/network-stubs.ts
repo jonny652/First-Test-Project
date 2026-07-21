@@ -115,15 +115,50 @@ function createCertificationsStub(transform: CertificationsTransform) {
   };
 }
 
+/**
+ * Like createCertificationsStub, but fails the request instead of
+ * transforming it. Can't just fulfill every request to GRAPHQL_URL with an
+ * error status — the Background steps (search, open the manufacturer page)
+ * hit this same shared endpoint before the Certifications tab is ever
+ * opened, and would break too. So this still fetches the real response and
+ * shape-checks it first, only replacing the certifications request
+ * specifically; everything else passes through untouched.
+ */
+function createCertificationsErrorStub(status: number) {
+  return async function setup(context: BrowserContext): Promise<void> {
+    await context.route(GRAPHQL_URL, async (route: Route) => {
+      const response = await route.fetch();
+      const json: unknown = await response.json();
+      // Only the shape-based match, not findCertificationsArray's key-name
+      // fallback: a general brand-overview request (fired during the
+      // Background's own navigation, before the Certifications tab is ever
+      // opened) happens to carry its own always-empty "certifications": []
+      // field, which the fallback matches by key name alone. Emptying/
+      // renaming that via the other stubs is a harmless no-op, but 500-ing
+      // that unrelated request here breaks the page's real navigation.
+      // Shape-checking is more precise and doesn't have this problem.
+      const match = findArrayByShape(json);
+
+      if (!match) {
+        await route.fulfill({ response });
+        return;
+      }
+
+      await route.fulfill({
+        status,
+        contentType: "application/json",
+        body: JSON.stringify({ errors: [{ message: "Internal Server Error" }] }),
+      });
+    });
+  };
+}
+
 export type NetworkStubSetup = (context: BrowserContext) => Promise<void>;
 
 // Add an entry here to bring another network-stub tag online — the Before
 // hook in hooks.ts reads each scenario's tags and calls applyNetworkStubs,
 // so any Given/When/Then referencing a tag below gets the matching stub
-// registered before the page loads. Other stub shapes (a 500, a slow
-// response, a dropped connection, a malformed payload) don't need the
-// fetch-then-transform plumbing above at all — e.g. route.fulfill({status:
-// 500}), a delay before fulfilling, or route.abort().
+// registered before the page loads.
 export const networkStubRegistry: Record<string, NetworkStubSetup> = {
   "@stub-empty-certifications": createCertificationsStub((match) => {
     match.container[match.key] = [];
@@ -134,6 +169,8 @@ export const networkStubRegistry: Record<string, NetworkStubSetup> = {
     const first = match.array[0] as Record<string, unknown>;
     first.name = "Stubbed Test Certification";
   }),
+
+  "@stub-server500-error": createCertificationsErrorStub(500),
 };
 
 export async function applyNetworkStubs(context: BrowserContext, tagNames: string[]): Promise<void> {
