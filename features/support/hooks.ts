@@ -13,8 +13,13 @@ setDefaultTimeout(60 * 1000);
 // be slow. Playwright's own test runner does this for you; here we do it by hand.
 let browser: Browser;
 
+// HEADED=true opens a visible browser (slowed down so actions are easy to
+// follow) instead of the default headless run — cucumber-js has no built-in
+// "UI mode" like Playwright Test's --ui, so this is the equivalent for
+// watching a scenario play out.
 BeforeAll(async function () {
-  browser = await chromium.launch();
+  const headed = process.env.HEADED === "true";
+  browser = await chromium.launch(headed ? { headless: false, slowMo: 250 } : {});
 });
 
 const traceDir = path.join(__dirname, "..", "..", "traces");
