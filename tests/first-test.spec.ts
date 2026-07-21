@@ -38,7 +38,7 @@ test.describe("Dyson manufacturer page", () => {
 
   // 5. Run an accessibility scan and save the results as an HTML report.
   test("accessibility audit of the dyson manufacturer page", async ({ page }) => {
-    await generateAccessibilityReport(page);
+    await generateAccessibilityReport(page, "dyson-accessibility-report.html");
   });
 
   // 6. Back-to-top button — full journey: hidden at top, visible after scroll, returns to top on click.
