@@ -153,6 +153,31 @@ function createCertificationsErrorStub(status: number) {
   };
 }
 
+/**
+ * Like createCertificationsErrorStub, but aborts the request instead of
+ * fulfilling it with an error status — simulates a dropped connection where
+ * no response arrives at all. Same reasoning as the error stub: can't abort
+ * every request to GRAPHQL_URL, since the Background's own navigation hits
+ * this shared endpoint too, so this still fetches the real response and
+ * shape-checks it first, only aborting the certifications request itself.
+ */
+function createCertificationsAbortStub() {
+  return async function setup(context: BrowserContext): Promise<void> {
+    await context.route(GRAPHQL_URL, async (route: Route) => {
+      const response = await route.fetch();
+      const json: unknown = await response.json();
+      const match = findArrayByShape(json);
+
+      if (!match) {
+        await route.fulfill({ response });
+        return;
+      }
+
+      await route.abort("connectionclosed");
+    });
+  };
+}
+
 export type NetworkStubSetup = (context: BrowserContext) => Promise<void>;
 
 // To add a new API test scenario:
@@ -179,6 +204,16 @@ export const networkStubRegistry: Record<string, NetworkStubSetup> = {
   }),
 
   "@stub-server500-error": createCertificationsErrorStub(500),
+
+  // 200 OK, but the certifications field itself is missing from the
+  // response — distinct from @stub-empty-certifications, which returns a
+  // valid (empty) array and triggers the "no results" messaging. Deleting
+  // the field simulates the data the UI needs being absent outright.
+  "@stub-malformed-certifications": createCertificationsStub((match) => {
+    delete match.container[match.key];
+  }),
+
+  "@stub-abort-certifications": createCertificationsAbortStub(),
 };
 
 export async function applyNetworkStubs(context: BrowserContext, tagNames: string[]): Promise<void> {

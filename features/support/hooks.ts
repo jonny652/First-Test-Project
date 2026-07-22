@@ -48,10 +48,23 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
   await this.context.tracing.stop({
     path: path.join(traceDir, `${safeName}-${status}-${uniqueSuffix}.zip`),
   });
+  // The app keeps firing background GraphQL requests even after a scenario's
+  // steps finish. If one of the api-regression stub route handlers (see
+  // utils/network-stubs.ts) is still mid route.fetch() when the context
+  // below gets disposed, that fetch rejects with "Request context disposed"
+  // — and since it's unhandled, it can surface as a failure in a LATER
+  // scenario's Before hook instead of this one. unrouteAll with
+  // ignoreErrors detaches the handlers first and swallows exactly that.
+  await this.page.unrouteAll({ behavior: "ignoreErrors" });
   await this.page.close();
   await this.context.close();
 });
 
-AfterAll(async function () {
+// browser.close() has to flush every scenario's accumulated trace data
+// (screenshots/snapshots/sources) before it can fully shut down — measured
+// at 1m20s for a 5-scenario api-regression run, comfortably past the default
+// 60s hook timeout (confirmed via diagnostics: 0 open contexts, 0 pending
+// route.fetch() calls at that point — genuinely slow teardown, not a leak).
+AfterAll({ timeout: 120 * 1000 }, async function () {
   await browser.close();
 });

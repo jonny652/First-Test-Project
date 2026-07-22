@@ -55,3 +55,13 @@ Feature: NBS Source API regression
   Scenario: A 500 server error shows no tiles
     When I open the Certifications tab
     Then the certifications tab renders no certifications
+
+    @regression @stub-malformed-certifications
+  Scenario: The certifications tab renders no tiles when the api returns a malformed payload
+    When I open the Certifications tab
+    Then the certifications tab renders no certifications
+
+        @regression @stub-abort-certifications
+  Scenario: The certifications tab renders no tiles when the api request is aborted
+    When I open the Certifications tab
+    Then the certifications tab renders no certifications
