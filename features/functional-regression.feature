@@ -3,6 +3,9 @@ Feature: Dyson manufacturer page
   I want to view the Dyson manufacturer page
   So that I can find information about Dyson
 
+  # Core UI checks for the Dyson manufacturer page: page content, navigation
+  # tabs, contact details, and the "add to collection" feature.
+
   Background:
     Given I am on the NBS Source homepage
     And I close the popup

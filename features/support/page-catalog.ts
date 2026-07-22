@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { CustomWorld } from "./world";
 
+// One catalog entry: how to get from a blank page to this named page.
 export interface RegressionPage {
   navigate: (world: CustomWorld) => Promise<void>;
 }

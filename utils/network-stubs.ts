@@ -1,7 +1,16 @@
+/**
+ * Network-mocking helpers for the api-regression scenarios. Intercepts the
+ * site's GraphQL requests and swaps in fake responses (a renamed
+ * certification, an empty list, a server error, a dropped connection, a
+ * malformed payload) so the UI's error handling can be tested on demand,
+ * without depending on the real API ever actually being in that state.
+ */
 import { type BrowserContext, type Route } from "@playwright/test";
 
 const GRAPHQL_URL = "https://api.source.thenbs.com/graphql";
 
+// Where in a GraphQL response the certifications list was found, and
+// what to mutate to fake a different result.
 interface CertificationsMatch {
   container: Record<string, unknown>;
   key: string;
@@ -216,6 +225,8 @@ export const networkStubRegistry: Record<string, NetworkStubSetup> = {
   "@stub-abort-certifications": createCertificationsAbortStub(),
 };
 
+// Called from hooks.ts before each scenario: registers whichever stub(s)
+// match the scenario's tags. A scenario with no matching tag is unaffected.
 export async function applyNetworkStubs(context: BrowserContext, tagNames: string[]): Promise<void> {
   for (const tag of tagNames) {
     const setup = networkStubRegistry[tag];
