@@ -57,7 +57,7 @@ Then("the \"I'm a manufacturer\" button should have the correct href {string}", 
 });
 
 When('I click the "Back to top" button it behaves as expected', async function (this: CustomWorld) {
-  await this.dysonManufacturerPage.clickBackToTopButton();
+  await this.dysonManufacturerPage.assertBackToTopButtonBehavesAsExpected();
 });
 
 Then("the tabs should be visible, in the correct order, and each href should be correct", async function (this: CustomWorld) {

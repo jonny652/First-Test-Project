@@ -2,6 +2,12 @@ import { type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { createHtmlReport } from "axe-html-reporter";
 
+// axe-html-reporter logs "HTML report was saved..." via console.info the
+// moment it writes each report, which interleaves it with the 'progress'
+// formatter's dots mid-run (see cucumber.js). Buffer those messages instead
+// and flush them once the whole run finishes — see flushAccessibilityReportMessages,
+// called from hooks.ts's AfterAll.
+const pendingReportMessages: string[] = [];
 
 /**
  * Reusable accessibility helper. Runs an axe scan and writes an HTML report.
@@ -15,11 +21,26 @@ import { createHtmlReport } from "axe-html-reporter";
  */
 export async function generateAccessibilityReport(page: Page, reportFileName: string): Promise<void> {
   const results = await new AxeBuilder({ page }).analyze();
-  createHtmlReport({
-    results,
-    options: {
-      outputDir: "accessibility-reports",
-      reportFileName,
-    },
-  });
+
+  const originalConsoleInfo = console.info;
+  console.info = (message: string) => pendingReportMessages.push(message);
+  try {
+    createHtmlReport({
+      results,
+      options: {
+        outputDir: "accessibility-reports",
+        reportFileName,
+      },
+    });
+  } finally {
+    console.info = originalConsoleInfo;
+  }
+}
+
+/** Prints every buffered "report saved" message, then clears the buffer. */
+export function flushAccessibilityReportMessages(): void {
+  for (const message of pendingReportMessages) {
+    console.info(message);
+  }
+  pendingReportMessages.length = 0;
 }
