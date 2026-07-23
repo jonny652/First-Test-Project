@@ -23,12 +23,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ['html'],
-    // Machine-readable results the CI "Log failing tests as GitHub issues"
-    // step reads (see scripts/log-ci-bugs.js and .github/workflows/playwright.yml).
-    ['json', { outputFile: 'test-results/results.json' }],
-  ],
+  reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -36,9 +31,6 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-
-    /* Screenshot on failure — attached to the HTML report and referenced by the auto-bug-logging step above. */
-    screenshot: 'only-on-failure',
   },
 
   /* Configure projects for major browsers */

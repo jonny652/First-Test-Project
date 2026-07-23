@@ -1,31 +1,17 @@
-// Shared by both CI jobs (Playwright and Cucumber/BDD, see
-// .github/workflows/playwright.yml) to file a GitHub issue for every test
-// failure in the run's report, or comment on the matching existing issue if
-// the same test has already been reported for the same failure. Gated by the
-// AUTO_LOG_BUGS repo variable so it can be toggled off without a code change.
-//
-// Usage: node scripts/log-ci-bugs.js <cucumber|playwright>
+// Runs after the CI "Run Cucumber/BDD tests" step (see
+// .github/workflows/playwright.yml) and files a GitHub issue for every
+// failed scenario in the report, or comments on the matching existing issue
+// if the same scenario has already been reported for the same failure.
+// Gated by the AUTO_LOG_BUGS repo variable so it can be toggled off without
+// a code change.
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
 const AUTO_BUG_LABEL = "auto-bug";
 const MARKER_PREFIX = "<!-- ci-bug-id:";
-
-const SOURCES = {
-  cucumber: {
-    label: "Cucumber",
-    reportPath: path.join(__dirname, "..", "cucumber-report", "cucumber-report.json"),
-    artifactName: "bdd-failure-screenshots",
-    extract: extractCucumberFailures,
-  },
-  playwright: {
-    label: "Playwright",
-    reportPath: path.join(__dirname, "..", "test-results", "results.json"),
-    artifactName: "playwright-report",
-    extract: extractPlaywrightFailures,
-  },
-};
+const REPORT_PATH = path.join(__dirname, "..", "cucumber-report", "cucumber-report.json");
+const ARTIFACT_NAME = "bdd-failure-screenshots";
 
 const token = process.env.GITHUB_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -36,25 +22,18 @@ if (repository) {
   runUrl = `${process.env.GITHUB_SERVER_URL || "https://github.com"}/${owner}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 }
 
-// Playwright's JSON reporter embeds ANSI colour codes in error messages —
-// harmless in a terminal, unreadable as literal escape codes in a GitHub
-// issue.
-function stripAnsi(text) {
-  return (text || "").replace(/\[[0-9;]*m/g, "");
-}
-
 function firstLine(message) {
-  return stripAnsi(message).split("\n")[0].trim();
+  return (message || "").split("\n")[0].trim();
 }
 
-// Failure name + first line of the error message: two different failures on
-// the same test (e.g. a broken selector vs. a real API contract change) get
-// separate issues instead of piling into one unrelated thread.
+// Scenario name + first line of the error message: two different failures
+// on the same scenario (e.g. a broken selector vs. a real API contract
+// change) get separate issues instead of piling into one unrelated thread.
 function dedupeHash(name, errorMessage) {
   return crypto.createHash("sha256").update(`${name}|${firstLine(errorMessage)}`).digest("hex").slice(0, 12);
 }
 
-function extractCucumberFailures(reportPath) {
+function extractFailures(reportPath) {
   const features = JSON.parse(fs.readFileSync(reportPath, "utf8"));
   const failures = [];
   for (const feature of features) {
@@ -64,39 +43,9 @@ function extractCucumberFailures(reportPath) {
       if (!failedStep) continue;
       failures.push({
         name: `${feature.name} — ${element.name}`,
-        errorMessage: stripAnsi(failedStep.result.error_message) || "No error message was captured for this failure.",
+        errorMessage: failedStep.result.error_message || "No error message was captured for this failure.",
       });
     }
-  }
-  return failures;
-}
-
-function extractPlaywrightFailures(reportPath) {
-  const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
-  const failures = [];
-
-  function walk(suite, ancestorTitles) {
-    const titlePath = suite.title ? [...ancestorTitles, suite.title] : ancestorTitles;
-    for (const spec of suite.specs || []) {
-      for (const test of spec.tests || []) {
-        // 'flaky' means an earlier attempt failed but a retry passed — not a
-        // real failure. Only 'unexpected' is a genuine failure after retries.
-        if (test.status !== "unexpected") continue;
-        const lastResult = test.results[test.results.length - 1];
-        const project = test.projectName ? `[${test.projectName}] ` : "";
-        failures.push({
-          name: `${project}${[...titlePath, spec.title].join(" › ")}`,
-          errorMessage: stripAnsi(lastResult?.error?.message) || "No error message was captured for this failure.",
-        });
-      }
-    }
-    for (const child of suite.suites || []) {
-      walk(child, titlePath);
-    }
-  }
-
-  for (const suite of report.suites || []) {
-    walk(suite, []);
   }
   return failures;
 }
@@ -134,26 +83,26 @@ async function findExistingIssue(hash) {
   }
 }
 
-function screenshotNote(artifactName) {
-  return `**Screenshot:** see the \`${artifactName}\` artifact on [this CI run](${runUrl}).`;
+function screenshotNote() {
+  return `**Screenshot:** see the \`${ARTIFACT_NAME}\` artifact on [this CI run](${runUrl}).`;
 }
 
-function buildIssueBody(failure, hash, artifactName) {
+function buildIssueBody(failure, hash) {
   return [
-    `**Failing test:** ${failure.name}`,
+    `**Failing scenario:** ${failure.name}`,
     "",
     "**Failure message:**",
     "```",
     failure.errorMessage,
     "```",
     "",
-    screenshotNote(artifactName),
+    screenshotNote(),
     "",
     `${MARKER_PREFIX} ${hash} -->`,
   ].join("\n");
 }
 
-function buildCommentBody(failure, artifactName) {
+function buildCommentBody(failure) {
   return [
     `Failure recurred in [this CI run](${runUrl}).`,
     "",
@@ -162,18 +111,18 @@ function buildCommentBody(failure, artifactName) {
     failure.errorMessage,
     "```",
     "",
-    screenshotNote(artifactName),
+    screenshotNote(),
   ].join("\n");
 }
 
-async function fileFailure(failure, artifactName) {
+async function fileFailure(failure) {
   const hash = dedupeHash(failure.name, failure.errorMessage);
   const existing = await findExistingIssue(hash);
 
   if (existing) {
     await githubRequest(`/repos/${owner}/${repo}/issues/${existing.number}/comments`, {
       method: "POST",
-      body: JSON.stringify({ body: buildCommentBody(failure, artifactName) }),
+      body: JSON.stringify({ body: buildCommentBody(failure) }),
     });
     if (existing.state === "closed") {
       await githubRequest(`/repos/${owner}/${repo}/issues/${existing.number}`, {
@@ -190,8 +139,8 @@ async function fileFailure(failure, artifactName) {
   const created = await githubRequest(`/repos/${owner}/${repo}/issues`, {
     method: "POST",
     body: JSON.stringify({
-      title: `[CI] Test failing: ${failure.name}`,
-      body: buildIssueBody(failure, hash, artifactName),
+      title: `[CI] Scenario failing: ${failure.name}`,
+      body: buildIssueBody(failure, hash),
       labels: [AUTO_BUG_LABEL],
     }),
   });
@@ -199,29 +148,24 @@ async function fileFailure(failure, artifactName) {
 }
 
 async function main() {
-  const sourceKey = process.argv[2];
-  const source = SOURCES[sourceKey];
-  if (!source) {
-    throw new Error(`log-ci-bugs: usage: node scripts/log-ci-bugs.js <${Object.keys(SOURCES).join("|")}>`);
-  }
   if (!token || !repository) {
     throw new Error("log-ci-bugs: GITHUB_TOKEN and GITHUB_REPOSITORY must be set (this script is meant to run in CI).");
   }
 
-  if (!fs.existsSync(source.reportPath)) {
-    console.log(`log-ci-bugs: no ${source.label} report found at ${source.reportPath}; nothing to log.`);
+  if (!fs.existsSync(REPORT_PATH)) {
+    console.log(`log-ci-bugs: no report found at ${REPORT_PATH}; nothing to log.`);
     return;
   }
 
-  const failures = source.extract(source.reportPath);
+  const failures = extractFailures(REPORT_PATH);
   if (!failures.length) {
-    console.log(`log-ci-bugs: no failed ${source.label} tests — nothing to log.`);
+    console.log("log-ci-bugs: no failed scenarios — nothing to log.");
     return;
   }
 
-  console.log(`log-ci-bugs: found ${failures.length} failed ${source.label} test(s). Filing/updating GitHub issues...`);
+  console.log(`log-ci-bugs: found ${failures.length} failed scenario(s). Filing/updating GitHub issues...`);
   for (const failure of failures) {
-    await fileFailure(failure, source.artifactName);
+    await fileFailure(failure);
   }
 }
 

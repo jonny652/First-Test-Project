@@ -13,8 +13,7 @@
     "test:all": "playwright test",
     "test:bdd": "node features/support/run-bdd.js",
     "test:bdd:report": "node features/support/run-bdd.js",
-    "log:ci-bugs:playwright": "node scripts/log-ci-bugs.js playwright",
-    "log:ci-bugs:cucumber": "node scripts/log-ci-bugs.js cucumber",
+    "log:ci-bugs": "node scripts/log-ci-bugs.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky"

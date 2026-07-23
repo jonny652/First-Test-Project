@@ -46,4 +46,4 @@ jobs:
       if: ${{ !cancelled() && vars.AUTO_LOG_BUGS == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run log:ci-bugs:cucumber
+      run: npm run log:ci-bugs
