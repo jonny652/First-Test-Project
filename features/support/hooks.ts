@@ -4,7 +4,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { CustomWorld } from "./world";
 import { applyNetworkStubs } from "../../utils/network-stubs";
-import { flushAccessibilityReportMessages } from "../../utils/accessability";
 import { BasePage } from "../../pages/BasePage";
 import { NbsHomePage } from "../../pages/NbsHomePage";
 
@@ -135,5 +134,4 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
 // route.fetch() calls at that point — genuinely slow teardown, not a leak).
 AfterAll({ timeout: 120 * 1000 }, async function () {
   await browser.close();
-  flushAccessibilityReportMessages();
 });

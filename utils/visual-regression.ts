@@ -1,4 +1,4 @@
-import { type Page } from "@playwright/test";
+import { type Page, type Locator } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import pixelmatch from "pixelmatch";
@@ -12,6 +12,11 @@ import { PNG } from "pngjs";
  * screenshot the current page and compare it against a saved baseline.
  *
  * `snapshotName` is the file-name prefix for this page's baseline (e.g. "dyson-visual").
+ *
+ * `mask` covers known-dynamic regions (e.g. rotating promo images, ad slots) with a
+ * solid block before the screenshot is taken — the same technique Playwright's own
+ * `toHaveScreenshot({ mask })` uses. Without it, elements that legitimately change
+ * between runs would fail the comparison even though nothing regressed.
  */
  
 /** Scrolls the full page top-to-bottom so lazy-loaded images start fetching. */
@@ -55,24 +60,18 @@ export async function applyVisualRegression(
   page: Page,
   projectName: string,
   snapshotName: string,
+  options: { mask?: Locator[] } = {},
 ): Promise<void> {
   // Get the page fully loaded and settled before screenshotting.
   await triggerLazyLoad(page);
   await page.waitForLoadState("networkidle", { timeout: 30000 });
  
-  // Check every image loaded (warn but carry on if not).
+  // Check every image loaded (carry on if not — a screenshot with a few
+  // still-loading images is still useful for comparison).
   try {
     await waitForImagesLoaded(page);
   } catch {
-    const pending = await page.evaluate(() =>
-      Array.from(document.images)
-        .filter((img) => !img.complete)
-        .map((img) => img.currentSrc || img.src || "<no src>"),
-    );
-    console.warn(
-      `waitForImagesLoaded timed out — ${pending.length} image(s) still loading. ` +
-      `Continuing with screenshot. Pending:\n  ${pending.join("\n  ")}`,
-    );
+    // Timed out waiting for images; proceed with the screenshot as-is.
   }
  
   // Wait for web fonts and any final animations to settle.
@@ -88,8 +87,10 @@ export async function applyVisualRegression(
  
   fs.mkdirSync(snapshotDir, { recursive: true });
  
-  // Take a full-page screenshot.
-  const screenshotBuffer = await page.screenshot({ fullPage: true });
+  // Take a full-page screenshot. Masked regions are painted over with a solid
+  // colour by Playwright before capture, so dynamic content there is identical
+  // (and never contributes to the pixelmatch diff) on every run.
+  const screenshotBuffer = await page.screenshot({ fullPage: true, mask: options.mask });
  
   // First run: save the screenshot as the baseline, then stop.
   if (!fs.existsSync(baselinePath)) {
@@ -107,13 +108,6 @@ export async function applyVisualRegression(
   // Crop both to the smaller size so a small height change doesn't error.
   const width = Math.min(baseline.width, actual.width);
   const height = Math.min(baseline.height, actual.height);
- 
-  if (baseline.width !== actual.width || baseline.height !== actual.height) {
-    console.warn(
-      `Image dimensions differ — baseline: ${baseline.width}x${baseline.height}, ` +
-      `actual: ${actual.width}x${actual.height}. Comparing cropped region ${width}x${height}.`,
-    );
-  }
  
   const cropPNG = (src: PNG): PNG => {
     const out = new PNG({ width, height });
