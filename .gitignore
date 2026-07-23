@@ -17,3 +17,4 @@ tests/snapshots/*-diff.png
 /allure-results/
 /allure-report/
 /traces/
+/screenshots/

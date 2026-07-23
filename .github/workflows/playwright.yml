@@ -8,6 +8,10 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Needed to file/comment on issues from the auto-bug-logging step below.
+      issues: write
     steps:
     - uses: actions/checkout@v5
     - uses: actions/setup-node@v5
@@ -40,3 +44,53 @@ jobs:
         path: tests/snapshots/*linux*.png
         if-no-files-found: warn
         retention-days: 7
+
+    # Toggle: set the "AUTO_LOG_BUGS" repository variable (Settings > Secrets
+    # and variables > Actions > Variables) to "true"/"false" to turn this on
+    # or off without touching this file. Runs whether the tests above passed
+    # or failed so it also picks up tests that were already failing.
+    - name: Log failing tests as GitHub issues
+      if: ${{ !cancelled() && vars.AUTO_LOG_BUGS == 'true' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm run log:ci-bugs:playwright
+
+  bdd-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Needed to file/comment on issues from the auto-bug-logging step below.
+      issues: write
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '24.15.0'
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Chromium only
+      run: npx playwright install chromium --with-deps
+
+    - name: Run Cucumber/BDD tests
+      run: npx cucumber-js
+
+    - name: Upload BDD failure screenshots
+      uses: actions/upload-artifact@v5
+      if: ${{ !cancelled() }}
+      with:
+        name: bdd-failure-screenshots
+        path: screenshots/
+        if-no-files-found: ignore
+        retention-days: 7
+
+    # Toggle: set the "AUTO_LOG_BUGS" repository variable (Settings > Secrets
+    # and variables > Actions > Variables) to "true"/"false" to turn this on
+    # or off without touching this file. Runs whether the tests above passed
+    # or failed so it also picks up scenarios that were already failing.
+    - name: Log failing scenarios as GitHub issues
+      if: ${{ !cancelled() && vars.AUTO_LOG_BUGS == 'true' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm run log:ci-bugs:cucumber

@@ -23,6 +23,7 @@ BeforeAll(async function () {
 });
 
 const traceDir = path.join(__dirname, "..", "..", "traces");
+const screenshotDir = path.join(__dirname, "..", "..", "screenshots");
 
 // Runs before every scenario: fresh context + page, so scenarios stay isolated
 // from each other (no shared cookies/storage), then wires up the page objects.
@@ -45,6 +46,18 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
   const status = (scenario.result?.status ?? "unknown").toLowerCase();
   const safeName = scenario.pickle.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
   const uniqueSuffix = scenario.pickle.id.slice(0, 8);
+
+  // Captured only on failure so the auto-bug-logging step (see
+  // scripts/log-ci-bugs.js) has an image to attach to the GitHub issue it
+  // files. .catch() guards against a page that's already crashed or closed
+  // itself as part of the failure.
+  if (status === "failed") {
+    fs.mkdirSync(screenshotDir, { recursive: true });
+    await this.page
+      .screenshot({ path: path.join(screenshotDir, `${safeName}-${uniqueSuffix}.png`), fullPage: true })
+      .catch(() => {});
+  }
+
   await this.context.tracing.stop({
     path: path.join(traceDir, `${safeName}-${status}-${uniqueSuffix}.zip`),
   });

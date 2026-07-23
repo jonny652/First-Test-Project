@@ -8,7 +8,8 @@ module.exports = {
     requireModule: ['ts-node/register'],
     format: [
       'progress-bar',
-      'allure-cucumberjs/reporter'
+      'allure-cucumberjs/reporter',
+      'json:cucumber-report/cucumber-report.json'
     ],
     formatOptions: {
       resultsDir: 'allure-results'
