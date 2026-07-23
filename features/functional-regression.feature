@@ -19,7 +19,7 @@ Feature: Dyson manufacturer page
     And the heading should contain "Dyson"
 
   Scenario: Check the Source logo links back to the homepage
-    When i check the source logo the href is as expected "/en/gx"
+    When i check the source logo the href is as expected "/en/gb"
 
   Scenario: Check the "I'm a manufacturer" button is visible with the right text and link
     When i check the "I'm a manufacturer" button its visible
