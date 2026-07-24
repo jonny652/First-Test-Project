@@ -60,9 +60,9 @@ Feature: NBS Source API regression
     When I open the Certifications tab
     Then the certifications tab renders no certifications
 
-    # Stubs a 200 OK response that's missing the data the UI actually needs,
-    # proving the app copes with broken/incomplete API data, not just errors.
-    @regression @stub-malformed-certifications
+  # Stubs a 200 OK response that's missing the data the UI actually needs,
+  # proving the app copes with broken/incomplete API data, not just errors.
+  @regression @stub-malformed-certifications
   Scenario: The certifications tab renders no tiles when the api returns a malformed payload
     When I open the Certifications tab
     Then the certifications tab renders no certifications
