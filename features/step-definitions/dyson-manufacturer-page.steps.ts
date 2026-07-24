@@ -73,8 +73,9 @@ Then("Ensure the HREF attribute on the Dyson telephone number is as expected {st
   await expect(this.dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", href);
 });
 
-Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld) {
+Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld, href: string) {
   await expect(this.dysonManufacturerPage.dysonWebsiteLink).toBeVisible();
+  await expect(this.dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("href", href);
   await expect(this.dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
 });
 
