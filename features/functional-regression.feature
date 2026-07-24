@@ -3,6 +3,9 @@ Feature: Dyson manufacturer page
   I want to view the Dyson manufacturer page
   So that I can find information about Dyson
 
+  # Core UI checks for the Dyson manufacturer page: page content, navigation
+  # tabs, contact details, and the "add to collection" feature.
+
   Background:
     Given I am on the NBS Source homepage
     And I close the popup
@@ -36,7 +39,7 @@ Feature: Dyson manufacturer page
     Then Ensure the HREF attribute on the Dyson telephone number is as expected "tel:08003457788"
 
   Scenario: Assert that the dyson Website link is visible and the href is correct
-    Then Ensure the HREF attribute on the Dyson Website link is as expected "https://www.dyson.co.uk"
+    Then Ensure the HREF attribute on the Dyson Website link is as expected "https://www.dyson.co.uk/commercial/overview"
 
   Scenario: Assert the LinkedIn icon is visible and has the expected href
     Then Ensure the HREF attribute on the LinkedIn icon is as expected "https://www.linkedin.com/company/dyson/"

@@ -6,7 +6,7 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
-accessibility-reports/dyson-accessibility-report.html
+/accessibility-reports/
 # Visual-regression run artifacts (only the baseline *.png should be committed)
 tests/snapshots/*-actual.png
 tests/snapshots/*-diff.png
@@ -17,3 +17,4 @@ tests/snapshots/*-diff.png
 /allure-results/
 /allure-report/
 /traces/
+/screenshots/

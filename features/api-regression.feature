@@ -46,12 +46,30 @@ Feature: NBS Source API regression
     When I open the Certifications tab
     Then The first certification tile shows "Stubbed Test Certification"
 
+  # Stubs the API to return zero certifications, proving the UI shows a
+  # helpful "no results" message instead of an empty or broken-looking page.
   @regression @stub-empty-certifications
   Scenario: No certifications available shows a suitable message
     When I open the Certifications tab
     Then a suitable message is shown indicating there are no certifications available
 
-  @regression @stub-server500-error 
+  # Stubs the certifications API to fail with a 500 error, proving the tab
+  # degrades gracefully (no tiles) instead of crashing the page.
+  @regression @stub-server500-error
   Scenario: A 500 server error shows no tiles
+    When I open the Certifications tab
+    Then the certifications tab renders no certifications
+
+  # Stubs a 200 OK response that's missing the data the UI actually needs,
+  # proving the app copes with broken/incomplete API data, not just errors.
+  @regression @stub-malformed-certifications
+  Scenario: The certifications tab renders no tiles when the api returns a malformed payload
+    When I open the Certifications tab
+    Then the certifications tab renders no certifications
+
+  # Simulates the connection dropping mid-request, proving the tab
+  # still renders (just with no tiles) instead of hanging indefinitely.
+  @regression @stub-abort-certifications
+  Scenario: The certifications tab renders no tiles when the api request is aborted
     When I open the Certifications tab
     Then the certifications tab renders no certifications

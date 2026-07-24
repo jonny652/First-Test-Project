@@ -1,3 +1,6 @@
+// Builds the Allure HTML report from the raw results the Cucumber run just
+// wrote to allure-results/, then forces the report to open in dark mode.
+// Called by run-bdd.js after every test run.
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");

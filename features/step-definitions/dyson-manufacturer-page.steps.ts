@@ -27,7 +27,11 @@ When("I open the Dyson manufacturer page", async function (this: CustomWorld) {
 });
 
 Then("I should be on the Dyson manufacturer page", async function (this: CustomWorld) {
-  await expect(this.page).toHaveURL(this.dysonManufacturerPage.url);
+  // Playwright's expect() defaults to a 5s poll, independent of (and much
+  // shorter than) Cucumber's 60s step timeout (see hooks.ts) — too tight for
+  // the search-results-to-overview-page navigation, which can occasionally
+  // take longer than that under real network conditions.
+  await expect(this.page).toHaveURL(this.dysonManufacturerPage.url, { timeout: 15000 });
 });
 
 // Scenario steps — mirrors test 1 in tests/first-test.spec.ts:20-23.
@@ -57,7 +61,7 @@ Then("the \"I'm a manufacturer\" button should have the correct href {string}", 
 });
 
 When('I click the "Back to top" button it behaves as expected', async function (this: CustomWorld) {
-  await this.dysonManufacturerPage.clickBackToTopButton();
+  await this.dysonManufacturerPage.assertBackToTopButtonBehavesAsExpected();
 });
 
 Then("the tabs should be visible, in the correct order, and each href should be correct", async function (this: CustomWorld) {
@@ -73,9 +77,9 @@ Then("Ensure the HREF attribute on the Dyson telephone number is as expected {st
   await expect(this.dysonManufacturerPage.dysonTelephoneNumber).toHaveAttribute("href", href);
 });
 
-Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld) {
+Then("Ensure the HREF attribute on the Dyson Website link is as expected {string}", async function (this: CustomWorld, href: string) {
   await expect(this.dysonManufacturerPage.dysonWebsiteLink).toBeVisible();
-  await expect(this.dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("target", "_blank");
+  await expect(this.dysonManufacturerPage.dysonWebsiteLink).toHaveAttribute("href", href);
 });
 
 Then("Ensure the HREF attribute on the LinkedIn icon is as expected {string}", async function (this: CustomWorld, href: string) {

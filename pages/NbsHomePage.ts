@@ -40,6 +40,8 @@ export class NbsHomePage extends BasePage {
     await this.dysonManufacturerTile.click();
   }
 
+  // Not currently used anywhere — search()/openManufacturersTab()/openDysonManufacturer()
+  // above cover the same journey and are what the tests actually call.
   async navigateToDysonManufacturerPage(): Promise<void> {
     //await this.page.goto("https://source.thenbs.com/en/gb");
     await this.closeDialogButton.click();

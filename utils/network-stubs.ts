@@ -1,7 +1,16 @@
+/**
+ * Network-mocking helpers for the api-regression scenarios. Intercepts the
+ * site's GraphQL requests and swaps in fake responses (a renamed
+ * certification, an empty list, a server error, a dropped connection, a
+ * malformed payload) so the UI's error handling can be tested on demand,
+ * without depending on the real API ever actually being in that state.
+ */
 import { type BrowserContext, type Route } from "@playwright/test";
 
 const GRAPHQL_URL = "https://api.source.thenbs.com/graphql";
 
+// Where in a GraphQL response the certifications list was found, and
+// what to mutate to fake a different result.
 interface CertificationsMatch {
   container: Record<string, unknown>;
   key: string;
@@ -88,6 +97,32 @@ function findCertificationsArray(node: unknown): CertificationsMatch | null {
 type CertificationsTransform = (match: CertificationsMatch) => void;
 
 /**
+ * The app keeps firing background GraphQL requests even after a scenario's
+ * steps finish (see hooks.ts's After hook comment). If a route handler is
+ * still mid route.fetch()/fulfill()/abort() when the After hook closes the
+ * page/context, Playwright rejects with "Request context disposed" (or a
+ * "closed" variant). Nothing is listening for this route's outcome anymore
+ * at that point, so there's nothing to recover — swallow it here instead of
+ * letting it surface as an unhandled rejection in a later scenario's Before
+ * hook. Any other error still propagates normally.
+ */
+function ignoringDisposedContext(handler: (route: Route) => Promise<void>): (route: Route) => Promise<void> {
+  return async (route) => {
+    try {
+      await handler(route);
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        /Request context disposed|Target closed|has been closed/i.test(error.message)
+      ) {
+        return;
+      }
+      throw error;
+    }
+  };
+}
+
+/**
  * Shared plumbing for every certifications stub: let the real request
  * through, find the certifications array in the real response, and apply
  * `transform` to it before fulfilling. Requests that aren't the
@@ -96,22 +131,25 @@ type CertificationsTransform = (match: CertificationsMatch) => void;
  */
 function createCertificationsStub(transform: CertificationsTransform) {
   return async function setup(context: BrowserContext): Promise<void> {
-    await context.route(GRAPHQL_URL, async (route: Route) => {
-      const response = await route.fetch();
-      const json: unknown = await response.json();
-      const match = findCertificationsArray(json);
+    await context.route(
+      GRAPHQL_URL,
+      ignoringDisposedContext(async (route: Route) => {
+        const response = await route.fetch();
+        const json: unknown = await response.json();
+        const match = findCertificationsArray(json);
 
-      if (!match) {
-        // route.fetch() already performed the network round-trip, so
-        // route.continue() is not valid here — fulfill with the real,
-        // unmodified response instead.
-        await route.fulfill({ response });
-        return;
-      }
+        if (!match) {
+          // route.fetch() already performed the network round-trip, so
+          // route.continue() is not valid here — fulfill with the real,
+          // unmodified response instead.
+          await route.fulfill({ response });
+          return;
+        }
 
-      transform(match);
-      await route.fulfill({ response, json });
-    });
+        transform(match);
+        await route.fulfill({ response, json });
+      })
+    );
   };
 }
 
@@ -126,30 +164,61 @@ function createCertificationsStub(transform: CertificationsTransform) {
  */
 function createCertificationsErrorStub(status: number) {
   return async function setup(context: BrowserContext): Promise<void> {
-    await context.route(GRAPHQL_URL, async (route: Route) => {
-      const response = await route.fetch();
-      const json: unknown = await response.json();
-      // Only the shape-based match, not findCertificationsArray's key-name
-      // fallback: a general brand-overview request (fired during the
-      // Background's own navigation, before the Certifications tab is ever
-      // opened) happens to carry its own always-empty "certifications": []
-      // field, which the fallback matches by key name alone. Emptying/
-      // renaming that via the other stubs is a harmless no-op, but 500-ing
-      // that unrelated request here breaks the page's real navigation.
-      // Shape-checking is more precise and doesn't have this problem.
-      const match = findArrayByShape(json);
+    await context.route(
+      GRAPHQL_URL,
+      ignoringDisposedContext(async (route: Route) => {
+        const response = await route.fetch();
+        const json: unknown = await response.json();
+        // Only the shape-based match, not findCertificationsArray's key-name
+        // fallback: a general brand-overview request (fired during the
+        // Background's own navigation, before the Certifications tab is ever
+        // opened) happens to carry its own always-empty "certifications": []
+        // field, which the fallback matches by key name alone. Emptying/
+        // renaming that via the other stubs is a harmless no-op, but 500-ing
+        // that unrelated request here breaks the page's real navigation.
+        // Shape-checking is more precise and doesn't have this problem.
+        const match = findArrayByShape(json);
 
-      if (!match) {
-        await route.fulfill({ response });
-        return;
-      }
+        if (!match) {
+          await route.fulfill({ response });
+          return;
+        }
 
-      await route.fulfill({
-        status,
-        contentType: "application/json",
-        body: JSON.stringify({ errors: [{ message: "Internal Server Error" }] }),
-      });
-    });
+        await route.fulfill({
+          status,
+          contentType: "application/json",
+          body: JSON.stringify({ errors: [{ message: "Internal Server Error" }] }),
+        });
+      })
+    );
+  };
+}
+
+/**
+ * Like createCertificationsErrorStub, but aborts the request instead of
+ * fulfilling it with an error status — simulates a dropped connection where
+ * no response arrives at all. Same reasoning as the error stub: can't abort
+ * every request to GRAPHQL_URL, since the Background's own navigation hits
+ * this shared endpoint too, so this still fetches the real response and
+ * shape-checks it first, only aborting the certifications request itself.
+ */
+function createCertificationsAbortStub() {
+  return async function setup(context: BrowserContext): Promise<void> {
+    await context.route(
+      GRAPHQL_URL,
+      ignoringDisposedContext(async (route: Route) => {
+        const response = await route.fetch();
+        const json: unknown = await response.json();
+        const match = findArrayByShape(json);
+
+        if (!match) {
+          await route.fulfill({ response });
+          return;
+        }
+
+        await route.abort("connectionclosed");
+      })
+    );
   };
 }
 
@@ -179,8 +248,20 @@ export const networkStubRegistry: Record<string, NetworkStubSetup> = {
   }),
 
   "@stub-server500-error": createCertificationsErrorStub(500),
+
+  // 200 OK, but the certifications field itself is missing from the
+  // response — distinct from @stub-empty-certifications, which returns a
+  // valid (empty) array and triggers the "no results" messaging. Deleting
+  // the field simulates the data the UI needs being absent outright.
+  "@stub-malformed-certifications": createCertificationsStub((match) => {
+    delete match.container[match.key];
+  }),
+
+  "@stub-abort-certifications": createCertificationsAbortStub(),
 };
 
+// Called from hooks.ts before each scenario: registers whichever stub(s)
+// match the scenario's tags. A scenario with no matching tag is unaffected.
 export async function applyNetworkStubs(context: BrowserContext, tagNames: string[]): Promise<void> {
   for (const tag of tagNames) {
     const setup = networkStubRegistry[tag];
