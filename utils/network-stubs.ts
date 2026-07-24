@@ -111,7 +111,10 @@ function ignoringDisposedContext(handler: (route: Route) => Promise<void>): (rou
     try {
       await handler(route);
     } catch (error) {
-      if (error instanceof Error && /disposed|closed/i.test(error.message)) {
+      if (
+        error instanceof Error &&
+        /Request context disposed|Target closed|has been closed/i.test(error.message)
+      ) {
         return;
       }
       throw error;
