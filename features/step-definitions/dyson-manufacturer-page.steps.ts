@@ -27,7 +27,11 @@ When("I open the Dyson manufacturer page", async function (this: CustomWorld) {
 });
 
 Then("I should be on the Dyson manufacturer page", async function (this: CustomWorld) {
-  await expect(this.page).toHaveURL(this.dysonManufacturerPage.url);
+  // Playwright's expect() defaults to a 5s poll, independent of (and much
+  // shorter than) Cucumber's 60s step timeout (see hooks.ts) — too tight for
+  // the search-results-to-overview-page navigation, which can occasionally
+  // take longer than that under real network conditions.
+  await expect(this.page).toHaveURL(this.dysonManufacturerPage.url, { timeout: 15000 });
 });
 
 // Scenario steps — mirrors test 1 in tests/first-test.spec.ts:20-23.
