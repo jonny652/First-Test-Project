@@ -4,6 +4,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { CustomWorld } from "./world";
 import { applyNetworkStubs } from "../../utils/network-stubs";
+import { BasePage } from "../../pages/BasePage";
+import { NbsHomePage } from "../../pages/NbsHomePage";
 
 // Cucumber's default per-step timeout is 5s, too short for real page
 // navigation/network waits. Match playwright.config.ts's 60s test timeout.
@@ -13,6 +15,57 @@ setDefaultTimeout(60 * 1000);
 // be slow. Playwright's own test runner does this for you; here we do it by hand.
 let browser: Browser;
 
+// Same file tests/auth.setup.ts writes to (see playwright.config.ts's
+// "setup" project) — sharing it means this suite and the Playwright-native
+// one reuse a single signed-in session instead of each signing in on their
+// own.
+const authFile = path.join(__dirname, "..", "..", "playwright", ".auth", "user.json");
+
+/** True if authFile's saved session still gets us signed in. */
+async function isSavedSessionStillValid(): Promise<boolean> {
+  const context = await browser.newContext({ storageState: authFile });
+  try {
+    const page = await context.newPage();
+    const nbsHomePage = new NbsHomePage(page);
+    await nbsHomePage.goto();
+    await nbsHomePage.closePopup();
+    await new BasePage(page).userMenuButton.waitFor({ state: "visible", timeout: 5000 });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await context.close();
+  }
+}
+
+/** Signs in fresh (mirrors tests/auth.setup.ts) and (re)writes authFile. */
+async function signInAndSaveAuthState(): Promise<void> {
+  const context = await browser.newContext();
+  try {
+    const page = await context.newPage();
+    const basePage = new BasePage(page);
+    const nbsHomePage = new NbsHomePage(page);
+    await nbsHomePage.goto();
+    await nbsHomePage.closePopup();
+    await basePage.verifySignInProcess();
+    fs.mkdirSync(path.dirname(authFile), { recursive: true });
+    await context.storageState({ path: authFile });
+  } finally {
+    await context.close();
+  }
+}
+
+// Reuse the saved session if it's still valid; otherwise sign in fresh so
+// every scenario's context (see Before below) starts already signed in —
+// same "sign in once, reuse everywhere" idea as auth.setup.ts, just driven
+// from this suite instead of depending on a separate `playwright test` run.
+async function ensureAuthenticated(): Promise<void> {
+  if (fs.existsSync(authFile) && (await isSavedSessionStillValid())) {
+    return;
+  }
+  await signInAndSaveAuthState();
+}
+
 // HEADED=true opens a visible browser (slowed down so actions are easy to
 // follow) instead of the default headless run — cucumber-js has no built-in
 // "UI mode" like Playwright Test's --ui, so this is the equivalent for
@@ -20,6 +73,7 @@ let browser: Browser;
 BeforeAll(async function () {
   const headed = process.env.HEADED === "true";
   browser = await chromium.launch(headed ? { headless: false, slowMo: 250 } : {});
+  await ensureAuthenticated();
 });
 
 const traceDir = path.join(__dirname, "..", "..", "traces");
@@ -29,7 +83,7 @@ const screenshotDir = path.join(__dirname, "..", "..", "screenshots");
 // from each other (no shared cookies/storage), then wires up the page objects.
 Before(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
   this.browser = browser;
-  this.context = await browser.newContext();
+  this.context = await browser.newContext({ storageState: authFile });
   // Tag-driven network stubs (see utils/network-stubs.ts) — must be
   // registered before any navigation happens, so this runs before newPage().
   await applyNetworkStubs(this.context, scenario.pickle.tags.map((tag) => tag.name));

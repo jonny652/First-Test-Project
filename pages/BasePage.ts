@@ -56,6 +56,22 @@ export class BasePage {
     await this.backToTopButton.click();
   }
 
+  /**
+   * Full "Back to top" journey: hidden at top, appears after scrolling down,
+   * clicking it scrolls the page back to top under its own steam (we only
+   * poll for that, we don't drive the scroll ourselves), and it hides again.
+   * Mirrors tests/first-test.spec.ts's "back-to-top button behaves correctly
+   * when scrolling" test.
+   */
+  async assertBackToTopButtonBehavesAsExpected(): Promise<void> {
+    await expect(this.backToTopButton).toBeHidden();
+    await this.scrollToBottom();
+    await expect(this.backToTopButton).toBeVisible();
+    await this.clickBackToTopButton();
+    await expect.poll(() => this.page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(this.backToTopButton).toBeHidden();
+  }
+
   //** Verify the sign in process is working correctly. */
   async verifySignInProcess(): Promise<void> {
     // Implementation for sign in verification goes here.

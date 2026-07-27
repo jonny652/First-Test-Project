@@ -23,7 +23,10 @@ export const pageCatalog: Record<string, RegressionPage> = {
       await world.nbsHomePage.search("dyson");
       await world.nbsHomePage.openManufacturersTab();
       await world.nbsHomePage.openDysonManufacturer();
-      await expect(world.page).toHaveURL(world.dysonManufacturerPage.url);
+      // Same generous timeout as dyson-manufacturer-page.steps.ts's equivalent
+      // assertion — Playwright's expect() defaults to a 5s poll, too tight for
+      // this navigation under real network conditions.
+      await expect(world.page).toHaveURL(world.dysonManufacturerPage.url, { timeout: 15000 });
     },
   },
 };
