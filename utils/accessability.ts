@@ -2,7 +2,6 @@ import { type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { createHtmlReport } from "axe-html-reporter";
 
-
 /**
  * Reusable accessibility helper. Runs an axe scan and writes an HTML report.
  *
@@ -15,11 +14,21 @@ import { createHtmlReport } from "axe-html-reporter";
  */
 export async function generateAccessibilityReport(page: Page, reportFileName: string): Promise<void> {
   const results = await new AxeBuilder({ page }).analyze();
-  createHtmlReport({
-    results,
-    options: {
-      outputDir: "accessibility-reports",
-      reportFileName,
-    },
-  });
+
+  // axe-html-reporter logs "HTML report was saved..." via console.info the
+  // moment it writes the report; suppress it to keep the 'progress' formatter's
+  // dots as the only terminal output (see cucumber.js).
+  const originalConsoleInfo = console.info;
+  console.info = () => {};
+  try {
+    createHtmlReport({
+      results,
+      options: {
+        outputDir: "accessibility-reports",
+        reportFileName,
+      },
+    });
+  } finally {
+    console.info = originalConsoleInfo;
+  }
 }
