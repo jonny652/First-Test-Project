@@ -16,6 +16,12 @@ export class BasePage {
   readonly manufactureUrl = "https://manufacturers.thenbs.com/nbs-source";
   readonly heading: Locator;
   readonly contactManufacturerButton: Locator;
+  readonly contactManufacturerPopup: Locator;
+  readonly contactManufacturePopupHeading: Locator
+  readonly contactManufacturePopupNameField: Locator 
+  readonly contactManufacturePopupEmailField: Locator 
+  readonly contactManufacturePopupMessageField: Locator 
+  readonly contactManufactureSendButton: Locator 
 
   constructor(page: Page) {
     this.page = page;
@@ -29,6 +35,13 @@ export class BasePage {
     this.userMenuButton = page.getByRole("button", { name: "Open user menu" });
     this.heading = page.getByRole("heading", { level: 1 });// this can moved to the base page if all manufacturer pages have a heading with level 1
     this.contactManufacturerButton = page.getByRole("button", { name: "Contact manufacturer" });
+    this.contactManufacturerPopup = page.getByRole("dialog");
+    this.contactManufacturePopupHeading = page.getByRole("heading", { name: "Contact manufacturer" })
+    this.contactManufacturePopupNameField = page.getByPlaceholder("Write your name here...")
+    this.contactManufacturePopupEmailField = page.getByPlaceholder("Write your email address here...")
+    this.contactManufacturePopupMessageField = page.getByPlaceholder("Write your message here...")
+    this.contactManufactureSendButton = page.getByRole("button", {name: "Send"})
+
   }
 
   // ACTIONS
@@ -99,12 +112,11 @@ export class BasePage {
   async contactManufacturerButtonBehavior(): Promise<void> {
     await this.contactManufacturerButton.click();
     // Verify that the Dyson logo, labels, fields and buttons are present in the pop up window
-    const contactManufacturerPopup = this.page.getByRole("dialog");
-    await expect(contactManufacturerPopup).toBeVisible();
-    await expect(contactManufacturerPopup.getByRole("heading", { name: "Contact manufacturer" })).toBeVisible();
-    await expect(contactManufacturerPopup.getByPlaceholder("Write your name here...")).toBeVisible();
-    await expect(contactManufacturerPopup.getByPlaceholder("Write your email address here...")).toBeVisible();
-    await expect(contactManufacturerPopup.getByPlaceholder("Write your message here...")).toBeVisible();
-    await expect(contactManufacturerPopup.getByRole("button", { name: "Send" })).toBeVisible();
+    await expect(this.contactManufacturerPopup).toBeVisible();
+    await expect(this.contactManufacturePopupHeading).toBeVisible();
+    await expect(this.contactManufacturePopupNameField).toBeVisible();
+    await expect(this.contactManufacturePopupEmailField).toBeVisible();
+    await expect(this.contactManufacturePopupMessageField).toBeVisible();
+    await expect(this.contactManufactureSendButton).toBeVisible();
   }
 }
