@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { type Page, type Locator, expect } from "@playwright/test";
 
 // Shared behaviour that applies to ANY page on the site (not specific to one page).
@@ -87,12 +88,18 @@ export class BasePage {
 
   //** Verify the sign in process is working correctly. */
   async verifySignInProcess(): Promise<void> {
+    const email = process.env.NBS_EMAIL;
+    const password = process.env.NBS_PASSWORD;
+    if (!email || !password) {
+      throw new Error("NBS_EMAIL and NBS_PASSWORD must be set (see .env.example).");
+    }
+
     // Implementation for sign in verification goes here.
     await this.signInButton.click();
-    await this.emailField.fill("jonny_uk@live.co.uk");
+    await this.emailField.fill(email);
     await this.next.click();
     await this.passwordField.click();
-    await this.passwordField.fill('Spitfire2026!');
+    await this.passwordField.fill(password);
     await this.signInButton.click();
     // Wait for the header's user menu to appear before returning, so callers
     // know sign in has actually completed rather than just having clicked through it.
