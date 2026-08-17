@@ -3,7 +3,7 @@ import { BasePage } from "./BasePage";
 
 // The Abloy UK manufacturer page — heading, logo, and the "I'm a manufacturer" button.
 export class AbloyManufacturerPage extends BasePage {
-  readonly url = "https://source.thenbs.com/en/gb/manufacturer/abloy-uk/nbAnmJUFmBRb9A2M4g4Gpz/overview";
+  readonly url = "/en/gb/manufacturer/abloy-uk/nbAnmJUFmBRb9A2M4g4Gpz/overview";
 
   // LOCATORS
 
@@ -19,6 +19,7 @@ export class AbloyManufacturerPage extends BasePage {
   readonly abloyTelephoneNumber: Locator;
   readonly abloyWebsiteLink: Locator;
   readonly linkedInIcon: Locator;
+  readonly visitTwitterLink: Locator;
   readonly heartAddItemToCollectionIcon: Locator;
 
   constructor(page: Page) {
@@ -36,6 +37,7 @@ export class AbloyManufacturerPage extends BasePage {
     this.abloyTelephoneNumber = page.locator('a[href="tel:+44 (0)1902 364500"]');
     this.abloyWebsiteLink = page.locator('a[href="https://www.abloy.co.uk"]');
     this.linkedInIcon = page.locator('a[href="https://www.linkedin.com/company/abloy-uk/"]');
+    this.visitTwitterLink = page.locator('a[href="https://twitter.com/abloymedia"]');
     this.heartAddItemToCollectionIcon = page.locator('[data-mat-icon-name="heart-circle-plus"].foreground-heart').first();
   }
 

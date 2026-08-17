@@ -22,7 +22,7 @@ export class NbsHomePage extends BasePage {
 
 /** Open t//he NBS Source homepage. */
   async goto(): Promise<void> {
-    await this.page.goto("https://source.thenbs.com/en/gb");
+    await this.page.goto("/en/gb");
   }
 
   /** Type a search term and submit it. */
