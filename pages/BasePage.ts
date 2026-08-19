@@ -34,7 +34,7 @@ export class BasePage {
     this.next = page.getByRole("button", { name: "Next" });
     this.imAManufacturerButton = page.locator('a[action="manufacturer-header-link"]');
     this.userMenuButton = page.getByRole("button", { name: "Open user menu" });
-    this.heading = page.getByRole("heading", { level: 1 });// this can moved to the base page if all manufacturer pages have a heading with level 1
+    this.heading = page.locator('h1') 
     this.contactManufacturerButton = page.getByRole("button", { name: "Contact manufacturer" });
     this.contactManufacturerPopup = page.getByRole("dialog");
     this.contactManufacturePopupHeading = page.getByRole("heading", { name: "Contact manufacturer" })
