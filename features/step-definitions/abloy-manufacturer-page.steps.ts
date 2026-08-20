@@ -73,3 +73,8 @@ Then("Ensure the HREF attribute on the Abloy LinkedIn icon is as expected {strin
 When("I click the Heart icon on the Abloy manufacturer page then it behaves as expected", async function (this: CustomWorld) {
   await this.abloyManufacturerPage.assertCollectionButtonBehavesAsExpected();
 });
+
+
+
+
+
