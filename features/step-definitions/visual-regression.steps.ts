@@ -24,6 +24,14 @@ const dynamicMaskSelectors: Partial<Record<string, string[]>> = {
   ],
 };
 
+// Extra settle time (ms) for pages that are still visibly rendering after
+// applyVisualRegression's own waits (networkidle, images, fonts) resolve.
+// The Dyson manufacturer page's content keeps painting in for a few seconds
+// after that, so screenshots taken right away catch it mid-render.
+const extraSettleTimeMs: Partial<Record<string, number>> = {
+  "Dyson manufacturer": 5000,
+};
+
 function getSnapshotName(page: string): string {
   const snapshotName = snapshotNames[page];
   if (!snapshotName) {
@@ -36,5 +44,11 @@ function getSnapshotName(page: string): string {
 // this runner's screenshots their own baseline (see utils/visual-regression.ts).
 Then("the {string} page should match the saved screenshot", async function (this: CustomWorld, page: string) {
   const mask: Locator[] | undefined = dynamicMaskSelectors[page]?.map((selector) => this.page.locator(selector));
+
+  const extraSettleTime = extraSettleTimeMs[page];
+  if (extraSettleTime) {
+    await this.page.waitForTimeout(extraSettleTime);
+  }
+
   await applyVisualRegression(this.page, "cucumber-chromium", getSnapshotName(page), { mask });
 });

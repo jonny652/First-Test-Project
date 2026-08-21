@@ -1,12 +1,14 @@
 import { test as base } from "@playwright/test";
 import { NbsHomePage } from "../pages/NbsHomePage";
 import { DysonManufacturerPage } from "../pages/DysonManufacturerPage";
+import { AbloyManufacturerPage } from "../pages/AbloyManufacturerPage";
 import { BasePage } from "../pages/BasePage";
 
 // The shape of the custom fixtures we're adding on top of Playwright's built-ins.
 type Pages = {
   nbsHomePage: NbsHomePage;
   dysonManufacturerPage: DysonManufacturerPage;
+  abloyManufacturerPage: AbloyManufacturerPage;
   basePage: BasePage;
 };
 
@@ -19,6 +21,9 @@ export const test = base.extend<Pages>({
   },
   dysonManufacturerPage: async ({ page }, use) => {
     await use(new DysonManufacturerPage(page));
+  },
+  abloyManufacturerPage: async ({ page }, use) => {
+    await use(new AbloyManufacturerPage(page));
   },
   basePage: async ({ page }, use) => {
     await use(new BasePage(page));

@@ -3,7 +3,7 @@ import { BasePage } from "./BasePage";
 
 // The Dyson manufacturer page — heading, logo, and the "I'm a manufacturer" button.
 export class DysonManufacturerPage extends BasePage {
-  readonly url = "https://source.thenbs.com/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview";
+  readonly url = "/en/gb/manufacturer/dyson/nakAxHWxDZprdqkBaCdn4U/overview";
 
   // LOCATORS
   

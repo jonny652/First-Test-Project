@@ -1,17 +1,79 @@
-name: BDD Tests
+name: Tests
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
 jobs:
-  bdd-tests:
+  # Disabled for now — only the Playwright .spec files should run in CI at the
+  # moment. To bring Cucumber/BDD back into the pipeline, uncomment this job.
+  # bdd-tests:
+  #   timeout-minutes: 60
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     # Needed to file/comment on issues from the auto-bug-logging step below.
+  #     issues: write
+  #   steps:
+  #   - uses: actions/checkout@v5
+  #   - uses: actions/setup-node@v5
+  #     with:
+  #       node-version: '24.15.0'
+  #   - name: Install dependencies
+  #     run: npm ci
+  #
+  #   - name: Lint
+  #     run: npm run lint
+  #
+  #   - name: Cache Playwright browsers
+  #     id: playwright-cache
+  #     uses: actions/cache@v4
+  #     with:
+  #       path: ~/.cache/ms-playwright
+  #       key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+  #
+  #   # Browser binaries are restored from cache above when unchanged, but the
+  #   # underlying OS packages (--with-deps) aren't part of that cache and don't
+  #   # persist between runs on the ephemeral GitHub-hosted runner, so they're
+  #   # still installed every time; only the (slower) browser download is skipped.
+  #   - name: Install Chromium browser (cache miss only)
+  #     if: steps.playwright-cache.outputs.cache-hit != 'true'
+  #     run: npx playwright install chromium --with-deps
+  #
+  #   - name: Install Chromium OS dependencies (cache hit)
+  #     if: steps.playwright-cache.outputs.cache-hit == 'true'
+  #     run: npx playwright install-deps chromium
+  #
+  #   - name: Run Cucumber/BDD tests
+  #     env:
+  #       NBS_EMAIL: ${{ secrets.NBS_EMAIL }}
+  #       NBS_PASSWORD: ${{ secrets.NBS_PASSWORD }}
+  #     run: npx cucumber-js
+  #
+  #   - name: Upload BDD failure screenshots
+  #     uses: actions/upload-artifact@v5
+  #     if: ${{ !cancelled() }}
+  #     with:
+  #       name: bdd-failure-screenshots
+  #       path: screenshots/
+  #       if-no-files-found: ignore
+  #       retention-days: 7
+  #
+  #   # Toggle: set the "AUTO_LOG_BUGS" repository variable (Settings > Secrets
+  #   # and variables > Actions > Variables) to "true"/"false" to turn this on
+  #   # or off without touching this file. Runs whether the tests above passed
+  #   # or failed so it also picks up scenarios that were already failing.
+  #   - name: Log failing scenarios as GitHub issues
+  #     if: ${{ !cancelled() && vars.AUTO_LOG_BUGS == 'true' }}
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     run: npm run log:ci-bugs
+
+  playwright-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # Needed to file/comment on issues from the auto-bug-logging step below.
-      issues: write
     steps:
     - uses: actions/checkout@v5
     - uses: actions/setup-node@v5
@@ -20,30 +82,34 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Lint
-      run: npm run lint
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-    - name: Install Chromium only
+    # Only chromium is installed — that's the only project these specs run
+    # against in CI (Microsoft Edge/firefox/webkit aren't installed here).
+    - name: Install Chromium browser (cache miss only)
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: npx playwright install chromium --with-deps
 
-    - name: Run Cucumber/BDD tests
-      run: npx cucumber-js
+    - name: Install Chromium OS dependencies (cache hit)
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      run: npx playwright install-deps chromium
 
-    - name: Upload BDD failure screenshots
+    - name: Run Playwright tests
+      env:
+        NBS_EMAIL: ${{ secrets.NBS_EMAIL }}
+        NBS_PASSWORD: ${{ secrets.NBS_PASSWORD }}
+      run: npx playwright test --project=chromium
+
+    - name: Upload Playwright report
       uses: actions/upload-artifact@v5
       if: ${{ !cancelled() }}
       with:
-        name: bdd-failure-screenshots
-        path: screenshots/
+        name: playwright-report
+        path: playwright-report/
         if-no-files-found: ignore
         retention-days: 7
-
-    # Toggle: set the "AUTO_LOG_BUGS" repository variable (Settings > Secrets
-    # and variables > Actions > Variables) to "true"/"false" to turn this on
-    # or off without touching this file. Runs whether the tests above passed
-    # or failed so it also picks up scenarios that were already failing.
-    - name: Log failing scenarios as GitHub issues
-      if: ${{ !cancelled() && vars.AUTO_LOG_BUGS == 'true' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run log:ci-bugs

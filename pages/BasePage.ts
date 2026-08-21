@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { type Page, type Locator, expect } from "@playwright/test";
 
 // Shared behaviour that applies to ANY page on the site (not specific to one page).
@@ -16,6 +17,12 @@ export class BasePage {
   readonly manufactureUrl = "https://manufacturers.thenbs.com/nbs-source";
   readonly heading: Locator;
   readonly contactManufacturerButton: Locator;
+  readonly contactManufacturerPopup: Locator;
+  readonly contactManufacturePopupHeading: Locator
+  readonly contactManufacturePopupNameField: Locator 
+  readonly contactManufacturePopupEmailField: Locator 
+  readonly contactManufacturePopupMessageField: Locator 
+  readonly contactManufactureSendButton: Locator 
 
   constructor(page: Page) {
     this.page = page;
@@ -27,8 +34,15 @@ export class BasePage {
     this.next = page.getByRole("button", { name: "Next" });
     this.imAManufacturerButton = page.locator('a[action="manufacturer-header-link"]');
     this.userMenuButton = page.getByRole("button", { name: "Open user menu" });
-    this.heading = page.getByRole("heading", { level: 1 });// this can moved to the base page if all manufacturer pages have a heading with level 1
+    this.heading = page.locator('h1') 
     this.contactManufacturerButton = page.getByRole("button", { name: "Contact manufacturer" });
+    this.contactManufacturerPopup = page.getByRole("dialog");
+    this.contactManufacturePopupHeading = page.getByRole("heading", { name: "Contact manufacturer" })
+    this.contactManufacturePopupNameField = page.getByPlaceholder("Write your name here...")
+    this.contactManufacturePopupEmailField = page.getByPlaceholder("Write your email address here...")
+    this.contactManufacturePopupMessageField = page.getByPlaceholder("Write your message here...")
+    this.contactManufactureSendButton = page.getByRole("button", {name: "Send"})
+
   }
 
   // ACTIONS
@@ -74,12 +88,18 @@ export class BasePage {
 
   //** Verify the sign in process is working correctly. */
   async verifySignInProcess(): Promise<void> {
+    const email = process.env.NBS_EMAIL;
+    const password = process.env.NBS_PASSWORD;
+    if (!email || !password) {
+      throw new Error("NBS_EMAIL and NBS_PASSWORD must be set (see .env.example).");
+    }
+
     // Implementation for sign in verification goes here.
     await this.signInButton.click();
-    await this.emailField.fill("jonny_uk@live.co.uk");
+    await this.emailField.fill(email);
     await this.next.click();
     await this.passwordField.click();
-    await this.passwordField.fill('Spitfire2026!');
+    await this.passwordField.fill(password);
     await this.signInButton.click();
     // Wait for the header's user menu to appear before returning, so callers
     // know sign in has actually completed rather than just having clicked through it.
@@ -99,12 +119,11 @@ export class BasePage {
   async contactManufacturerButtonBehavior(): Promise<void> {
     await this.contactManufacturerButton.click();
     // Verify that the Dyson logo, labels, fields and buttons are present in the pop up window
-    const contactManufacturerPopup = this.page.getByRole("dialog");
-    await expect(contactManufacturerPopup).toBeVisible();
-    await expect(contactManufacturerPopup.getByRole("heading", { name: "Contact manufacturer" })).toBeVisible();
-    await expect(contactManufacturerPopup.getByPlaceholder("Write your name here...")).toBeVisible();
-    await expect(contactManufacturerPopup.getByPlaceholder("Write your email address here...")).toBeVisible();
-    await expect(contactManufacturerPopup.getByPlaceholder("Write your message here...")).toBeVisible();
-    await expect(contactManufacturerPopup.getByRole("button", { name: "Send" })).toBeVisible();
+    await expect(this.contactManufacturerPopup).toBeVisible();
+    await expect(this.contactManufacturePopupHeading).toBeVisible();
+    await expect(this.contactManufacturePopupNameField).toBeVisible();
+    await expect(this.contactManufacturePopupEmailField).toBeVisible();
+    await expect(this.contactManufacturePopupMessageField).toBeVisible();
+    await expect(this.contactManufactureSendButton).toBeVisible();
   }
 }
