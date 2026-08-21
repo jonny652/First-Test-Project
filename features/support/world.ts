@@ -3,6 +3,7 @@ import { type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { BasePage } from "../../pages/BasePage";
 import { NbsHomePage } from "../../pages/NbsHomePage";
 import { DysonManufacturerPage } from "../../pages/DysonManufacturerPage";
+import { AbloyManufacturerPage } from "../../pages/AbloyManufacturerPage";
 
 // The Cucumber equivalent of fixtures/test-options.ts — instead of Playwright
 // handing page objects to a test via fixtures, every step definition gets
@@ -15,6 +16,7 @@ export class CustomWorld extends World {
   basePage!: BasePage;
   nbsHomePage!: NbsHomePage;
   dysonManufacturerPage!: DysonManufacturerPage;
+  abloyManufacturerPage!: AbloyManufacturerPage;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -26,6 +28,7 @@ export class CustomWorld extends World {
     this.basePage = new BasePage(this.page);
     this.nbsHomePage = new NbsHomePage(this.page);
     this.dysonManufacturerPage = new DysonManufacturerPage(this.page);
+    this.abloyManufacturerPage = new AbloyManufacturerPage(this.page);
   }
 }
 

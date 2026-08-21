@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "codegen": "playwright codegen https://source.thenbs.com",
-    "test:ui": "playwright test --ui --project=\"Microsoft Edge\"",
+    "test:ui": "playwright test --ui",
     "test:headless": "playwright test --project=\"Microsoft Edge\"",
     "test:all": "playwright test",
     "test:bdd": "node features/support/run-bdd.js",
