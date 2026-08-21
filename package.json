@@ -28,6 +28,7 @@
     "allure-commandline": "^2.43.0",
     "allure-cucumberjs": "^3.10.2",
     "axe-html-reporter": "^2.2.11",
+    "dotenv": "^17.4.2",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.10.5",

@@ -23,10 +23,29 @@ jobs:
     - name: Lint
       run: npm run lint
 
-    - name: Install Chromium only
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+    # Browser binaries are restored from cache above when unchanged, but the
+    # underlying OS packages (--with-deps) aren't part of that cache and don't
+    # persist between runs on the ephemeral GitHub-hosted runner, so they're
+    # still installed every time; only the (slower) browser download is skipped.
+    - name: Install Chromium browser (cache miss only)
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: npx playwright install chromium --with-deps
 
+    - name: Install Chromium OS dependencies (cache hit)
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      run: npx playwright install-deps chromium
+
     - name: Run Cucumber/BDD tests
+      env:
+        NBS_EMAIL: ${{ secrets.NBS_EMAIL }}
+        NBS_PASSWORD: ${{ secrets.NBS_PASSWORD }}
       run: npx cucumber-js
 
     - name: Upload BDD failure screenshots
